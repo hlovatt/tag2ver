@@ -1,3 +1,6 @@
+Tag git repository with incremented [semantic version](https://semver.org) and description
+and update `py` and `pyi` file's `__version__` attribute to semanic version and description.
+
 Usage from directory with git repository to be tagged and source files to update:
 
   *  tag2ver.py [options] [v<Major>.<Minor>.<Patch> "Release Description."]`, if `tag2ver.py` is executable 
