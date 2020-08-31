@@ -8,8 +8,8 @@ import sys
 
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
-__license__ = "MIT https://opensource.org/licenses/MIT (as used by MicroPython)."
-__version__ = "v0.0.0"
+__license__ = "MIT https://opensource.org/licenses/MIT."
+__version__ = "v0.1.0: Features complete release."
 
 from pathlib import Path
 
@@ -113,11 +113,11 @@ def ensure_version(forced_version: bool, version: str) -> None:
     major, minor, patch = scan_version(version)
     if forced_version:
         return
-    git_tags_process = subprocess.run(['git', 'tag'], stdout=subprocess.PIPE, text=True)
-    git_tags_process.check_returncode()
+    git_tag_list_process = subprocess.run(['git', 'tag'], stdout=subprocess.PIPE, text=True)
+    git_tag_list_process.check_returncode()
     last_version = ''  # Doesn't do anything other than keep PyCharm control flow happy!
     try:
-        last_version = git_tags_process.stdout.split()[-1]
+        last_version = git_tag_list_process.stdout.split()[-1]
     except IndexError:
         ensure(
             False,  # Always causes error message to print and then exit program.
@@ -147,7 +147,7 @@ def version_files(version: str, description: str) -> None:
                             f'File `{file}` has more than one line beginning `__version__`.'
                         )
                     version_line = True
-                    new_file.append(f'__version__ = "{version} {description}"\n')
+                    new_file.append(f'__version__ = "{version}: {description}"\n')
                 else:
                     new_file.append(line)
             ensure(
@@ -160,15 +160,22 @@ def version_files(version: str, description: str) -> None:
         bak_path.unlink()
 
 
+def version_repository(version: str, description: str) -> None:
+    git_new_tag_process = subprocess.run(
+        ['git', 'tag', '-a', f'{version}', '-m', f'"{description}"'],
+        stdout=subprocess.PIPE,
+        text=True
+    )
+    git_new_tag_process.check_returncode()
+
+
 def main() -> None:
     forced_version = is_forced_and_ensure_args()
     version = sys.argv[2] if forced_version else sys.argv[1]
     ensure_version(forced_version, version)
     description = sys.argv[3] if forced_version else sys.argv[2]
     version_files(version, description)
-
-    print(version)
-    print(description)
+    version_repository(version, description)
 
 
 if __name__ == '__main__':
