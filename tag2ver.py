@@ -9,7 +9,7 @@ import sys
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
-__version__ = "v0.1.1: Features complete release and committed to repository."
+__version__ = "."
 
 from pathlib import Path
 
