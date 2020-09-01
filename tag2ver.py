@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 """
-Update `py` and `pyi` file's `__version__` attribute with given incremented
-[semantic version](https://semver.org) and given description,
-commit `py` and `pyi` with given description, and
-tag git repository with given version and given description.
+See HELP_TEXT.
 """
-import subprocess
-import sys
+
 
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
@@ -14,18 +10,24 @@ __license__ = "MIT https://opensource.org/licenses/MIT."
 __version__ = "v0.3.0: Add commit after versioning and errors go to stderr"
 
 
+__all__ = ['main']
+
+import os
+import subprocess
+import sys
+
 from pathlib import Path
 
 from typing import Tuple, List
 
+
 VERSION_NAME = '__version__'
+HELP_TEXT = '''
+'''
 
 
 def print_help_msg(file=sys.stdout) -> None:
-    readme = Path('README.md')
-    with readme.open() as f:
-        help_text = f.read()
-    print(help_text, file=file)
+    print(HELP_TEXT, file=file)
 
 
 def ensure(condition: bool, msg: str) -> None:
@@ -38,10 +40,28 @@ def ensure(condition: bool, msg: str) -> None:
     exit(1)
 
 
-def ensure_process(process):
+def ensure_process(*cmd: str) -> subprocess.CompletedProcess:
+    process = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+    )
     ensure(
         process.returncode == 0,
         f'Sub-process `{process.args}` returned {process.returncode}',
+    )
+    return process
+
+
+def ensure_git() -> None:
+    git_check_process = subprocess.run(
+        ['git', 'ls-files'],
+        capture_output=True,
+        text=True,
+    )
+    ensure(
+        bool(git_check_process.stdout),
+        f'Current directory, {os.getcwd()}, does not have a git repository.',
     )
 
 
@@ -100,8 +120,7 @@ def ensure_version(forced_version: bool, version: str) -> None:
     major, minor, patch = scan_version(version)
     if forced_version:
         return
-    git_tag_list_process = subprocess.run(['git', 'tag'], stdout=subprocess.PIPE, text=True)
-    ensure_process(git_tag_list_process)
+    git_tag_list_process = ensure_process('git', 'tag')
     last_version = ''  # Doesn't do anything other than keep PyCharm control flow happy!
     try:
         last_version = git_tag_list_process.stdout.split()[-1]
@@ -144,24 +163,15 @@ def version_files(version: str, description: str) -> None:
 
 
 def commit_files(description: str) -> None:
-    git_commit_process = subprocess.run(
-        ['git', 'commit', '-am', f'"{description}"'],
-        stdout=subprocess.PIPE,
-        text=True
-    )
-    ensure_process(git_commit_process)
+    ensure_process('git', 'commit', '-am', f'"{description}"')
 
 
 def tag_repository(version: str, description: str) -> None:
-    git_new_tag_process = subprocess.run(
-        ['git', 'tag', '-a', f'{version}', '-m', f'"{description}"'],
-        stdout=subprocess.PIPE,
-        text=True
-    )
-    ensure_process(git_new_tag_process)
+    ensure_process('git', 'tag', '-a', f'{version}', '-m', f'"{description}"')
 
 
 def main() -> None:
+    ensure_git()
     forced_version = is_forced_and_ensure_args()
     version = sys.argv[2] if forced_version else sys.argv[1]
     ensure_version(forced_version, version)
