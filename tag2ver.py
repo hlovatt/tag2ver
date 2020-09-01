@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Tag git repository with incremented [semantic version](https://semver.org) and
-update `py` and `pyi` file's `__version__` to tag.
+Tag git repository with incremented [semantic version](https://semver.org) and description
+and update `py` and `pyi` file's `__version__` attribute to semantic version and description.
 """
 import subprocess
 import sys
@@ -11,13 +11,15 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __version__ = "v0.1.2: Features complete release and committed to repository."
 
-# TODO: Do not change any file unless all files can be changed.
+# TODO: Check that all changes are committed.
 # TODO: Catch error from `check_returncode`.
 # TODO: Print errors, but not help, to stderr.
 
 from pathlib import Path
 
 from typing import Tuple, List
+
+VERSION_NAME = '__version__'
 
 
 def print_help_msg() -> None:
@@ -140,24 +142,20 @@ def version_files(version: str, description: str) -> None:
     files = list(Path().rglob("*.py"))
     files.extend(Path().rglob("*.pyi"))
     for file in files:
+        with file.open() as f:
+            text = f.read()
+            ensure(
+                f'\n{VERSION_NAME}' in text,
+                f'File `{file}` does not have a line beginning `{VERSION_NAME}`.'
+            )
+    for file in files:
         new_file: List[str] = []
         with file.open() as f:
-            version_line = False
             for line in f:
-                if line.startswith('__version__'):
-                    if version_line:
-                        ensure(
-                            False,  # Force error message, help text, and exit.
-                            f'File `{file}` has more than one line beginning `__version__`.'
-                        )
-                    version_line = True
-                    new_file.append(f'__version__ = "{version}: {description}"\n')
+                if line.startswith(VERSION_NAME):
+                    new_file.append(f'{VERSION_NAME} = "{version}: {description}"\n')
                 else:
                     new_file.append(line)
-            ensure(
-                version_line,
-                f'File `{file}` does not have a line beginning `__version__`.'
-            )
         bak_path = Path(str(file) + '.bak')
         file.rename(bak_path)
         file.write_text(''.join(new_file))
