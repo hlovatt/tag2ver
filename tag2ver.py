@@ -11,6 +11,10 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __version__ = "v0.1.2: Features complete release and committed to repository."
 
+# TODO: Do not change any file unless all files can be changed.
+# TODO: Catch error from `check_returncode`.
+# TODO: Print errors, but not help, to stderr.
+
 from pathlib import Path
 
 from typing import Tuple, List
