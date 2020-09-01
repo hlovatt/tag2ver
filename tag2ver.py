@@ -13,7 +13,6 @@ __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __version__ = "v0.2.0: Added check that all files have __version__ line."
 
-# TODO: Print errors, but not help, to stderr.
 
 from pathlib import Path
 
@@ -22,7 +21,7 @@ from typing import Tuple, List
 VERSION_NAME = '__version__'
 
 
-def print_help_msg() -> None:
+def print_help_msg(file=sys.stdout) -> None:
     print(r'''
 Usage from directory with git repository to be tagged and source files to update:
 
@@ -67,16 +66,16 @@ EG:
   * `<tag2ver dir>.tag2ver.py v1.0.0 "Make incompatible changes, tag, and version."`, 
   for 4th release.
   * Etc. for subsequent releases.
-''')
+''', file=file)
 
 
 def ensure(condition: bool, msg: str) -> None:
     """Similar to `assert`, except that it prints the help message instead of a stack trace and is always enabled."""
     if condition:
         return
-    print_help_msg()
-    print()
-    print(msg)
+    print_help_msg(file=sys.stderr)
+    print(file=sys.stderr)
+    print(msg, file=sys.stderr)
     exit(1)
 
 
@@ -90,10 +89,9 @@ def ensure_process(process):
 def is_forced_and_ensure_args() -> bool:
     args = sys.argv
     num_args = len(args)
-    ensure(
-        num_args > 1 and args[1] != '-h',
-        ''
-    )
+    if num_args < 2 or args[1] != '-h':
+        print_help_msg()
+        exit(0)
     ensure(
         args[1][0] != '-' or args[1] == '-f',
         f'Option, {args[1]}, not understood, must be: absent, `-h`, or `-f`.'
