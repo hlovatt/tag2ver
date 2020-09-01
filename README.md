@@ -5,12 +5,11 @@ tag git repository with given version and given description.
 
 Usage from directory with git repository to be tagged and source files to update:
 
-  *  `tag2ver.py \[options] [v<Major>.<Minor>.<Patch> "Release/commit Description."]`, 
+  *  `tag2ver.py [options] [v<Major>.<Minor>.<Patch> "Release/commit Description."]`, 
   if `tag2ver.py` is executable and on execution path.
-  *  `<tag2ver dir>.tag2ver.py [options] [v<Major>.<Minor>.<Patch> 
-  "Release/commit Description."]`, if `tag2ver.py` is executable but not on execution path.
-  *  `python3 <tag2ver dir>.tag2ver.py [options] [v<Major>.<Minor>.<Patch> 
-  "Release/commit Description."]`.
+  *  `<tag2ver dir>.tag2ver.py [options] [v<Major>.<Minor>.<Patch> "Release/commit Description."]`,
+  if `tag2ver.py` is executable but not on execution path.
+  *  `python3 <tag2ver dir>.tag2ver.py [options] [v<Major>.<Minor>.<Patch> "Release/commit Description."]`.
 
 Options:
 
@@ -25,8 +24,8 @@ Version:
 
 Description:
 
-  * Description of the version, normally a single short sentence 
-  (typically in quotes to allow spaces).
+  * Description of the version: a single, short, < 50 characters, sentence with 
+  an imperative mood (in quotes to allow spaces).
 
 Actions:
 

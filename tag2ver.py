@@ -11,7 +11,7 @@ import sys
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
-__version__ = "v0.2.0: Added check that all files have __version__ line."
+__version__ = "v0.3.0: Add commit after versioning and errors go to stderr"
 
 
 from pathlib import Path
@@ -22,51 +22,10 @@ VERSION_NAME = '__version__'
 
 
 def print_help_msg(file=sys.stdout) -> None:
-    print(r'''
-Usage from directory with git repository to be tagged and source files to update:
-
-  *  `tag2ver.py \[options] [v<Major>.<Minor>.<Patch> "Release/commit Description."]`, 
-  if `tag2ver.py` is executable and on execution path.
-  *  `<tag2ver dir>.tag2ver.py [options] [v<Major>.<Minor>.<Patch> 
-  "Release/commit Description."]`, if `tag2ver.py` is executable but not on execution path.
-  *  `python3 <tag2ver dir>.tag2ver.py [options] [v<Major>.<Minor>.<Patch> 
-  "Release/commit Description."]`.
-
-Options:
-
-  * `-h`, print this message (rest of command line ignored).
-  * `-f`, force the given version even if it is not a single increment.
-
-Version:
-
-  * Must be a [semantic version](https://semver.org) with format `v<Major>.<Minor>.<Patch>`.
-  * Must be a single increment from previous version, unless `-f` option given.
-  * Use `<tag2ver dir>.tag2ver.py -f v0.0.0 "Add initial tag and version."`, for 1st release.
-
-Description:
-
-  * Description of the version, normally a single short sentence 
-  (typically in quotes to allow spaces).
-
-Actions:
-
-  * Updates the `__version__` attribute of all the `py` and `pyi` file's in the 
-  current directory and sub-directories with given version and given description 
-  (`__version__` attribute must already exist).
-  * Commits all modified files, included `py` and `pyi` files that have modified 
-  `__version__` attribute, with given description.
-  * Tags the repository with given version and given description.
-
-EG:
-
-  * `<tag2ver dir>.tag2ver.py -h`, prints help.
-  * `<tag2ver dir>.tag2ver.py -f v0.0.0 "Add initial tag and version."`, for 1st release.
-  * `<tag2ver dir>.tag2ver.py v0.0.1 "Fix bugs, tag, and version."`, for 2nd release.
-  * `<tag2ver dir>.tag2ver.py v0.1.0 "Add features, tag, and version."`, for 3rd release.
-  * `<tag2ver dir>.tag2ver.py v1.0.0 "Make incompatible changes, tag, and version."`, 
-  for 4th release.
-  * Etc. for subsequent releases.
-''', file=file)
+    readme = Path('README.md')
+    with readme.open() as f:
+        help_text = f.read()
+    print(help_text, file=file)
 
 
 def ensure(condition: bool, msg: str) -> None:
@@ -89,7 +48,7 @@ def ensure_process(process):
 def is_forced_and_ensure_args() -> bool:
     args = sys.argv
     num_args = len(args)
-    if num_args < 2 or args[1] != '-h':
+    if num_args < 2 or args[1] == '-h':
         print_help_msg()
         exit(0)
     ensure(
