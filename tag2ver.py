@@ -9,10 +9,9 @@ import sys
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
-__version__ = "v0.1.2: Features complete release and committed to repository."
+__version__ = "v0.2.0: Added check that all files have __version__ line."
 
-# TODO: Check that all changes are committed.
-# TODO: Catch error from `check_returncode`.
+# TODO: Commit after tagging and versioning, with description as commit message. Change help text to reflect this.
 # TODO: Print errors, but not help, to stderr.
 
 from pathlib import Path
@@ -36,7 +35,7 @@ Options:
 Version:
   * Must be a [semantic version](https://semver.org) with format `v<Major>.<Minor>.<Patch>`.
   * Must be a single increment from previous version, unless `-f` option given.
-  * Use `<tag2ver dir>.tag2ver.py -f v0.0.0 "Initial release."`, for 1st release.
+  * Use `<tag2ver dir>.tag2ver.py -f v0.0.0 "Add initial tag and version."`, for 1st release.
 Description:
   * Description of the version, normally a single short sentence (typically in quotes to allow spaces).
 Actions:
@@ -45,10 +44,10 @@ Actions:
   `__version__` attribute must already exist.
 EG:
   * `<tag2ver dir>.tag2ver.py -h`, prints help.
-  * `<tag2ver dir>.tag2ver.py -f v0.0.0 "Initial release."`, for 1st release.
-  * `<tag2ver dir>.tag2ver.py v0.0.1 "Bug fixes release."`, for 2nd release.
-  * `<tag2ver dir>.tag2ver.py v0.1.0 "New features release."`, for 3rd release.
-  * `<tag2ver dir>.tag2ver.py v1.0.0 "Incompatible changes release."`, for 4th release.
+  * `<tag2ver dir>.tag2ver.py -f v0.0.0 "Add initial tag and version."`, for 1st release.
+  * `<tag2ver dir>.tag2ver.py v0.0.1 "Fix bugs, tag, and version."`, for 2nd release.
+  * `<tag2ver dir>.tag2ver.py v0.1.0 "Add features, tag, and version."`, for 3rd release.
+  * `<tag2ver dir>.tag2ver.py v1.0.0 "Make incompatible changes, tag, and version."`, for 4th release.
   * Etc. for subsequent releases.
 ''')
 
@@ -61,6 +60,13 @@ def ensure(condition: bool, msg: str) -> None:
     print()
     print(msg)
     exit(1)
+
+
+def ensure_process(process):
+    ensure(
+        process.returncode == 0,
+        f'Sub-process `{process.args}` returned {process.returncode}',
+    )
 
 
 def is_forced_and_ensure_args() -> bool:
@@ -120,14 +126,14 @@ def ensure_version(forced_version: bool, version: str) -> None:
     if forced_version:
         return
     git_tag_list_process = subprocess.run(['git', 'tag'], stdout=subprocess.PIPE, text=True)
-    git_tag_list_process.check_returncode()
+    ensure_process(git_tag_list_process)
     last_version = ''  # Doesn't do anything other than keep PyCharm control flow happy!
     try:
         last_version = git_tag_list_process.stdout.split()[-1]
     except IndexError:
         ensure(
             False,  # Always causes error message to print and then exit program.
-            f'No previous tags in repository, perhaps `<tag2ver dir>.tag2ver.py -f v0.0.0 "Initial release."`?'
+            f'No previous tags, perhaps `<tag2ver dir>.tag2ver.py -f v0.0.0 "Add initial tag and version."`?'
         )
     last_major, last_minor, last_patch = scan_version(last_version)
     ensure(
@@ -168,7 +174,7 @@ def version_repository(version: str, description: str) -> None:
         stdout=subprocess.PIPE,
         text=True
     )
-    git_new_tag_process.check_returncode()
+    ensure_process(git_new_tag_process)
 
 
 def main() -> None:
