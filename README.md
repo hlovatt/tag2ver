@@ -46,6 +46,7 @@ Actions:
   * Commits all modified files, included `py` and `pyi` files that have modified 
   `__version__` attribute, with given description.
   * Tags the repository with given version and given description.
+  * If `remote` exists, pushes `origin` to `master`.
 
 EG:
 
