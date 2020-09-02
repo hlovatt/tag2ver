@@ -5,7 +5,7 @@ Update the HELP_TEXT in `tag2ver.py` from `README.md` and then calls `tag2ver` w
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
-__version__ = "v0.5.0: Add updateself to use README as help text"
+__version__ = "v0.6.0: Correct deletion of blank line following HELP_TEXT."
 
 
 __all__ = ['main']
