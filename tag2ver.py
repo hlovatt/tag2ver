@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """
-See HELP_TEXT.
+See `HELP_TEXT` below or `README.md` file.
 """
-
 
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __version__ = "v0.5.0: Add updateself to use README as help text"
-
 
 __all__ = ['main']
 
@@ -20,8 +18,7 @@ from pathlib import Path
 
 from typing import Tuple, List
 
-
-VERSION_NAME = '__version__'
+VERSION_ATTR = '__version__'
 HELP_TEXT = '''
 Usage from *folder with git repository to tag and source files to version*:
 
@@ -69,6 +66,7 @@ EG:
   for 4th release.
   * Etc. for subsequent releases.
 '''
+
 
 def print_help_msg(file=sys.stdout) -> None:
     print(HELP_TEXT, file=file)
@@ -188,15 +186,15 @@ def version_files(version: str, description: str) -> None:
         with file.open() as f:
             text = f.read()
             ensure(
-                f'\n{VERSION_NAME}' in text,
-                f'File `{file}` does not have a line beginning `{VERSION_NAME}`.'
+                f'\n{VERSION_ATTR}' in text,
+                f'File `{file}` does not have a line beginning `{VERSION_ATTR}`.'
             )
     for file in files:
         new_file: List[str] = []
         with file.open() as f:
             for line in f:
-                if line.startswith(VERSION_NAME):
-                    new_file.append(f'{VERSION_NAME} = "{version}: {description}"\n')
+                if line.startswith(VERSION_ATTR):
+                    new_file.append(f'{VERSION_ATTR} = "{version}: {description}"\n')
                 else:
                     new_file.append(line)
         bak_path = Path(str(file) + '.bak')

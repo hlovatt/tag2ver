@@ -42,7 +42,7 @@ def append_new_help_text(new_py: List[str]) -> None:
         next(readme_file)  # Consume blank line.
         for new_help_line in readme_file:
             new_py.append(new_help_line)
-    new_py.append(HELP_TEXT_END)
+    new_py.append(HELP_TEXT_END + '\n')
 
 
 def update_help_text():
