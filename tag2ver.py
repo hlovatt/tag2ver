@@ -7,7 +7,7 @@ See HELP_TEXT.
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
-__version__ = "v0.3.0: Add commit after versioning and errors go to stderr"
+__version__ = "v0.4.0: Add push to remote (if remote exists)"
 
 
 __all__ = ['main']
@@ -57,11 +57,10 @@ def ensure_git() -> None:
     git_check_process = subprocess.run(
         ['git', 'ls-files'],
         capture_output=True,
-        text=True,
     )
     ensure(
-        bool(git_check_process.stdout),
-        f'Current directory, {os.getcwd()}, does not have a git repository.',
+        git_check_process.returncode == 0 and bool(git_check_process.stdout),
+        f'Current directory, {os.getcwd()}, does not have a git repository with at least one file.',
     )
 
 
@@ -170,6 +169,15 @@ def tag_repository(version: str, description: str) -> None:
     ensure_process('git', 'tag', '-a', f'{version}', '-m', f'"{description}"')
 
 
+def push_repository_if_remote_exists() -> None:
+    git_check_remote_process = subprocess.run(
+        ['git', 'ls-remote'],
+        capture_output=True,
+    )
+    if git_check_remote_process.returncode == 0 and bool(git_check_remote_process.stdout):
+        ensure_process('git', 'push', 'origin', 'master')
+
+
 def main() -> None:
     ensure_git()
     forced_version = is_forced_and_ensure_args()
@@ -179,6 +187,7 @@ def main() -> None:
     version_files(version, description)
     commit_files(description)
     tag_repository(version, description)
+    push_repository_if_remote_exists()
 
 
 if __name__ == '__main__':
