@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
+Easy release management: file versioning, git commit, git tagging, git remote, and PyPI.
 See `HELP_TEXT` below or `README.md` file for more info.
 """
 
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
-__repository__ = 'https://github.com/hlovatt/tag2ver'
+__repository__ = "https://github.com/hlovatt/tag2ver"
 __version__ = "0.6.2"
 
 __all__ = ['main', 'replace_file']
@@ -18,7 +19,7 @@ import sys
 
 from pathlib import Path
 
-from typing import Tuple, List
+from typing import List
 
 VERSION_RE_STR = r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
 VERSION_RE = re.compile(r'^' + VERSION_RE_STR + r'$')
