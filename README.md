@@ -18,6 +18,9 @@ Alternatively:
 
     pip3 install tag2ver
 
+`tag2ver` is careful to check everything before making changes, i.e. it is heavily
+biased to finding and reporting an error before attempting any actions.
+
 ## Help Text
 
 Usage from *folder with git repository to tag and source files to version*:
@@ -35,16 +38,26 @@ Options:
 
 Version:
 
-  * Must be a [semantic version](https://semver.org) with format `<Major>.<Minor>.<Patch>`.
+  * Must be a [semantic version](https://semver.org) with format `<Major>.<Minor>.<Patch>`,
+  where `Major`, `Minor`, and `Patch` are positive integers or zero.
   * Must be a single increment from previous git tag version, unless `-f` option given.
-  * Must be at least one increment from PyPI version (if PyPI used, `-f` not considered).
+  * If PyPi used must be at least one increment from PyPI version 
+  (`-f` not considered for PyPI version comparison).
   * Use: `<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."` 
-  (or similar), for 1st tagging in repository.
+  (or similar), for 1st tagging in repository. Note:
+    * `py` and `pyi` files still need version attr (though it can be an empty string), 
+    e.g. `__version__ = ''`.
+    * Similarly `setup`, e.g. `version='0.0.0'` (must have a valid version though).
+    * Since `setup` must contain a valid version the smallest version that can be in PyPi
+    is `0.0.1` (since version in `setup` must be increased). In practice this isn't a problem
+    since much development happens before ready for PyPI and therefore version already `>0.0.0`.
+  * Leading zeros are allowed but ignored, e.g. `00.00.00` is the same as `0.0.0`.
+  * Leading plus not allowed, e.g. `+0.0.0` is an error.
 
 Description:
 
-  * Description of the version: a single, short, < 50 characters, sentence with 
-  an imperative mood (in quotes to allow spaces).
+  * Description of the version: a single, short, ideally < 50 characters, sentence with 
+  an imperative mood (in double quotes to allow spaces).
 
 Actions:
 
@@ -55,7 +68,7 @@ Actions:
     * Checks version number is at least one increment from last PyPI deployment 
     (regardless of `-f` option).
     * Updates `setup.py`'s `version` attribute with given version 
-    (`version` attribute must already exist).
+    (`version` kwarg must already exist).
   * Updates the `__version__` attribute of all the `py` and `pyi` file's in the 
   current directory and sub-directories with given version 
   (`__version__` attribute must already exist).
@@ -68,7 +81,8 @@ Actions:
 EG:
 
   * `<tag2ver dir>.tag2ver.py -h`, prints help.
-  * `<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`, for 1st release.
+  * `<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`, 
+  for 1st release (note `-f` and note `0.0.0` cannot be pushed to PyPI).
   * `<tag2ver dir>.tag2ver.py 0.0.1 "Fix bugs, tag, and version."`, for 2nd release.
   * `<tag2ver dir>.tag2ver.py 0.1.0 "Add features, tag, and version."`, for 3rd release.
   * `<tag2ver dir>.tag2ver.py 1.0.0 "Make incompatible changes, tag, and version."`, 

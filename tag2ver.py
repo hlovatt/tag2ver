@@ -26,7 +26,7 @@ VERSION_RE = re.compile(r'^' + VERSION_RE_STR + r'$')
 VERSION_ATTR = '__version__'
 SETUP_NAME = 'setup.py'
 SETUP_PATH = Path(SETUP_NAME)
-SETUP_VERSION_RE = re.compile(r'(?P<attr>version\s*=\s*)(?P<quote>' + r"'" + r'|")' + VERSION_RE_STR + r'(?P=quote)')
+SETUP_VERSION_RE = re.compile(r'(?P<attr>version\s*=\s*)(?P<quote>["|' + r"'])" + VERSION_RE_STR + r'(?P=quote)')
 HELP_TEXT = '''
 Usage from *folder with git repository to tag and source files to version*:
 
@@ -132,12 +132,12 @@ def is_forced_and_ensure_args():
     if args[1] == '-f':
         ensure(
             num_args == 4,
-            f"`-f` option must be followed by both 'version' and 'description'."
+            f"`-f` option must be followed by both 'version' and 'description' (and nothing else)."
         )
         return True
     ensure(
         num_args == 3,
-        f"Both 'version' and 'description' must be given."
+        f"Both 'version' and 'description' must be given (and nothing else if no options)."
     )
     return False
 
@@ -179,10 +179,14 @@ def replace_file(path: Path, new_text: List[str]):
     bak_path.unlink()
 
 
+def version_as_str(major: int, minor: int, patch: int):
+    return str(major) + '.' + str(minor) + '.' + str(patch)
+
+
 def version_setup_and_ensure_version_if_setup_exists(major: int, minor: int, patch: int):
     if not SETUP_PATH.is_file():
         return
-    sub_str = r'\g<attr>\g<quote>' + str(major) + r'.' + str(minor) + r'.' + str(patch) + r'\g<quote>'
+    sub_str = r'\g<attr>\g<quote>' + version_as_str(major, minor, patch) + r'\g<quote>'
     version_found = False
     new_setup: List[str] = []
     with SETUP_PATH.open() as setup_lines:
@@ -224,7 +228,7 @@ def version_setup_and_ensure_version_if_setup_exists(major: int, minor: int, pat
     replace_file(SETUP_PATH, new_setup)
 
 
-def version_files(version: str):
+def version_files(major: int, minor: int, patch: int):
     paths = list(Path().rglob("*.py"))
     paths.extend(Path().rglob("*.pyi"))
     for path in paths:
@@ -241,7 +245,7 @@ def version_files(version: str):
         with path.open() as file:
             for line in file:
                 if line.startswith(VERSION_ATTR):
-                    new_file.append(f'{VERSION_ATTR} = "{version}"\n')
+                    new_file.append(f'{VERSION_ATTR} = "{version_as_str(major, minor, patch)}"\n')
                 else:
                     new_file.append(line)
         replace_file(path, new_file)
@@ -251,17 +255,17 @@ def commit_files(description: str):
     ensure_process('git', 'commit', '-am', f'"{description}"')
 
 
-def tag_repository(version: str, description: str):
-    ensure_process('git', 'tag', '-a', f'{version}', '-m', f'"{description}"')
+def tag_repository(major: int, minor: int, patch: int, description: str):
+    ensure_process('git', 'tag', '-a', f'{version_as_str(major, minor, patch)}', '-m', f'"{description}"')
 
 
-def push_repository_if_remote_exists(version: str):
+def push_repository_if_remote_exists(major: int, minor: int, patch: int):
     git_check_remote_process = subprocess.run(
         ['git', 'ls-remote'],
         capture_output=True,
     )
     if git_check_remote_process.returncode == 0 and bool(git_check_remote_process.stdout):
-        ensure_process('git', 'push', '--atomic', 'origin', 'master', version)
+        ensure_process('git', 'push', '--atomic', 'origin', 'master', version_as_str(major, minor, patch))
 
 
 def publish_to_pypi_if_setup_exists():
@@ -275,11 +279,11 @@ def main():
     major, minor, patch = parse_version(version)
     ensure_tag_version_if_not_forced(major, minor, patch, forced_version)
     version_setup_and_ensure_version_if_setup_exists(major, minor, patch)
-    version_files(version)
+    version_files(major, minor, patch)
     description = sys.argv[3] if forced_version else sys.argv[2]
     commit_files(description)
-    tag_repository(version, description)
-    push_repository_if_remote_exists(version)
+    tag_repository(major, minor, patch, description)
+    push_repository_if_remote_exists(major, minor, patch)
     publish_to_pypi_if_setup_exists()
 
 
