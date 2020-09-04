@@ -5,8 +5,8 @@ Update the HELP_TEXT in `tag2ver.py` from `README.md` and then calls `tag2ver` w
 __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
-__version__ = "v0.6.0: Correct deletion of blank line following HELP_TEXT."
-
+__repository__ = 'https://github.com/hlovatt/tag2ver'
+__version__ = "0.6.1"
 
 __all__ = ['main']
 
@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import List, TextIO
 
 import tag2ver
-
 
 HELP_TEXT = 'HELP_TEXT'
 HELP_TEXT_START = f"{HELP_TEXT} = '''"
@@ -57,10 +56,7 @@ def update_help_text():
                 consume_old_help_text(py_file)
                 append_new_help_text(new_py)
     assert help_text_found, f'No `{HELP_TEXT}` line in `{TAG2VER}`.'
-    bak_path = Path(str(py_path) + '.bak')
-    py_path.rename(bak_path)
-    py_path.write_text(''.join(new_py))
-    bak_path.unlink()
+    tag2ver.replace_file(py_path, new_py)
 
 
 def main() -> None:
