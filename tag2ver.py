@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = 'https://github.com/hlovatt/tag2ver'
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 
 __all__ = ['main', 'replace_file']
 
@@ -84,7 +84,7 @@ EG:
 '''
 
 
-def ensure(condition: bool, msg: str) -> None:
+def ensure(condition: bool, msg: str):
     """Similar to `assert`, except that it prints the help message instead of a stack trace and is always enabled."""
     if condition:
         return
@@ -94,7 +94,7 @@ def ensure(condition: bool, msg: str) -> None:
     exit(1)
 
 
-def ensure_process(*cmd: str) -> subprocess.CompletedProcess:
+def ensure_process(*cmd: str):
     process = subprocess.run(
         cmd,
         capture_output=True,
@@ -107,7 +107,7 @@ def ensure_process(*cmd: str) -> subprocess.CompletedProcess:
     return process
 
 
-def ensure_git() -> None:
+def ensure_git_exists():
     git_check_process = subprocess.run(
         ['git', 'ls-files'],
         capture_output=True,
@@ -118,7 +118,7 @@ def ensure_git() -> None:
     )
 
 
-def is_forced_and_ensure_args() -> bool:
+def is_forced_and_ensure_args():
     args = sys.argv
     num_args = len(args)
     if num_args < 2 or args[1] == '-h':
@@ -141,7 +141,7 @@ def is_forced_and_ensure_args() -> bool:
     return False
 
 
-def scan_version(version: str) -> Tuple[int, int, int]:
+def parse_version(version: str):
     version_match = VERSION_RE.match(version)
     ensure(
         bool(version_match),
@@ -150,7 +150,7 @@ def scan_version(version: str) -> Tuple[int, int, int]:
     return int(version_match.group('major')), int(version_match.group('minor')), int(version_match.group('patch'))
 
 
-def ensure_tag_version(major: int, minor: int, patch: int, forced_version: bool) -> None:
+def ensure_tag_version_if_not_forced(major: int, minor: int, patch: int, forced_version: bool):
     if forced_version:
         return
     git_tag_list_process = ensure_process('git', 'tag')
@@ -162,7 +162,7 @@ def ensure_tag_version(major: int, minor: int, patch: int, forced_version: bool)
             False,  # Always causes error message to print and then exit program.
             f'No previous tags, perhaps `<tag2ver dir>.tag2ver.py -f v0.0.0 "Add initial tag and version."`?'
         )
-    last_major, last_minor, last_patch = scan_version(last_version)
+    last_major, last_minor, last_patch = parse_version(last_version)
     ensure(
         (major == last_major + 1 and minor == 0 and patch == 0) or
         (major == last_major and minor == last_minor + 1 and patch == 0) or
@@ -171,14 +171,14 @@ def ensure_tag_version(major: int, minor: int, patch: int, forced_version: bool)
     )
 
 
-def replace_file(path: Path, new_text: List[str]) -> None:
+def replace_file(path: Path, new_text: List[str]):
     bak_path = path.with_suffix('.bak')
     path.rename(bak_path)
     path.write_text(''.join(new_text))
     bak_path.unlink()
 
 
-def version_setup_and_ensure_version_if_setup_exists(major: int, minor: int, patch: int) -> None:
+def version_setup_and_ensure_version_if_setup_exists(major: int, minor: int, patch: int):
     if not SETUP_PATH.is_file():
         return
     sub_str = r'\g<attr>\g<quote>' + str(major) + r'.' + str(minor) + r'.' + str(patch) + r'\g<quote>'
@@ -223,7 +223,7 @@ def version_setup_and_ensure_version_if_setup_exists(major: int, minor: int, pat
     replace_file(SETUP_PATH, new_setup)
 
 
-def version_files(version: str) -> None:
+def version_files(version: str):
     paths = list(Path().rglob("*.py"))
     paths.extend(Path().rglob("*.pyi"))
     for path in paths:
@@ -246,39 +246,39 @@ def version_files(version: str) -> None:
         replace_file(path, new_file)
 
 
-def commit_files(description: str) -> None:
+def commit_files(description: str):
     ensure_process('git', 'commit', '-am', f'"{description}"')
 
 
-def tag_repository(version: str, description: str) -> None:
+def tag_repository(version: str, description: str):
     ensure_process('git', 'tag', '-a', f'{version}', '-m', f'"{description}"')
 
 
-def push_repository_if_remote_exists() -> None:
+def push_repository_if_remote_exists(version: str):
     git_check_remote_process = subprocess.run(
         ['git', 'ls-remote'],
         capture_output=True,
     )
     if git_check_remote_process.returncode == 0 and bool(git_check_remote_process.stdout):
-        ensure_process('git', 'push', 'origin', 'master')
+        ensure_process('git', 'push', '--atomic', 'origin', 'master', version)
 
 
 def publish_to_pypi_if_setup_exists():
     pass
 
 
-def main() -> None:
-    ensure_git()
+def main():
+    ensure_git_exists()
     forced_version = is_forced_and_ensure_args()
     version = sys.argv[2] if forced_version else sys.argv[1]
-    major, minor, patch = scan_version(version)
-    ensure_tag_version(major, minor, patch, forced_version)
-    description = sys.argv[3] if forced_version else sys.argv[2]
+    major, minor, patch = parse_version(version)
+    ensure_tag_version_if_not_forced(major, minor, patch, forced_version)
     version_setup_and_ensure_version_if_setup_exists(major, minor, patch)
     version_files(version)
+    description = sys.argv[3] if forced_version else sys.argv[2]
     commit_files(description)
     tag_repository(version, description)
-    push_repository_if_remote_exists()
+    push_repository_if_remote_exists(version)
     publish_to_pypi_if_setup_exists()
 
 
