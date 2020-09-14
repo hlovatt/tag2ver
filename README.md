@@ -1,6 +1,7 @@
 # `tag2var`
 
-Easy release management: file versioning, git commit, git tagging, git remote, and PyPI. 
+Easy release management: file versioning, git commit, git tagging, and  optionally 
+git remote and PyPI. 
 
 The name `tag2var` is meant to convey that the utility does everything from 
 git tagging to file versioning and all in between and either side. In particular: 
