@@ -4,14 +4,21 @@ Easy release management: file versioning, git commit, git tagging, and  optional
 git remote and PyPI. 
 
 The name `tag2var` is meant to convey that the utility does everything from 
-git tagging to file versioning and all in between and either side. In particular: 
-`tag2var` updates `py` and `pyi` file's `__version__` attribute with given incremented 
-[semantic version](https://semver.org), 
-updates `version` attribute of `setup.py` (if `setup` exists),
-commits `*.py` and `*.pyi` (including `setup.py`) files with given description,
-tags git repository with given version and given description, 
-pushes to remote (if remote exists), and uploads to `PyPI` 
-(if `setup` exists).
+git tagging to file versioning and all in between and either side. In particular
+`tag2var`:
+
+1. Updates `py` and `pyi` file's `__version__` attribute with given incremented 
+[semantic version](https://semver.org).
+
+2. Updates `version` attribute of `setup.py` as above (if `setup` exists).
+
+3. Git commits `*.py` and `*.pyi` (including `setup.py`) files with given description.
+
+4. Git tags git repository with given version and given description.
+
+5. Pushes to remote git (if remote exists).
+
+6. Uploads to `PyPI` (if `setup.py` exists).
 
 The whole program is in the single file, `tag2var.py`, (without any dependencies outside 
 of Python3.6+) and therefore this file alone can be copied to install the utility. 
@@ -34,8 +41,9 @@ Usage from *folder with git repository to tag and source files to version*:
 
 Options:
 
-  * `-h`, print this message (rest of command line ignored).
-  * `-f`, force the given git version (not PyPI) even if it is not a single increment.
+  * `-h` or `--help`, print this message (rest of command line ignored).
+  * `-f` or `--force`, force the given git version (not PyPI) even if it is not a single 
+  increment.
 
 Version:
 
@@ -67,12 +75,12 @@ Actions:
   and of form `<Major>.<Minor>.<Patch>` and description exists.
   * Checks if PyPI deployed (`setup.py` must exist).
     * Checks version number is at least one increment from last PyPI deployment 
-    (regardless of `-f` option).
+    (regardless of `-f` option - PyPi versioning cannot be overridden).
     * Updates `setup.py`'s `version` attribute with given version 
     (`version` kwarg must already exist).
   * Updates the `__version__` attribute of all the `py` and `pyi` file's in the 
   current directory and sub-directories with given version 
-  (`__version__` attribute must already exist).
+  (`__version__` attributes must already exist in all files).
   * Commits all modified files, including `py` and `pyi` files that have been modified, 
   with given description.
   * Tags the repository with given version and given description.
