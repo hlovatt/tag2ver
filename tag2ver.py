@@ -100,7 +100,7 @@ def ensure_tag_version_if_not_forced(
         (major == last_major + 1 and minor == 0 and patch == 0) or
         (major == last_major and minor == last_minor + 1 and patch == 0) or
         (major == last_major and minor == last_minor and patch == last_patch + 1),
-        f'{major}.{minor}.{patch} not a single increment from {last_version}.',
+        f'{version_as_str(major, minor, patch)} not a single increment from {last_version}.',
         parser,
     )
 
@@ -113,7 +113,7 @@ def replace_file(path: Path, new_text: List[str]):
 
 
 def version_as_str(major: int, minor: int, patch: int):
-    return str(major) + '.' + str(minor) + '.' + str(patch)
+    return f'{major}.{minor}.{patch}'
 
 
 def version_setup_and_ensure_version_if_setup_exists(
@@ -156,8 +156,8 @@ def version_setup_and_ensure_version_if_setup_exists(
                     or
                     (major == pypi_major and minor == pypi_minor and patch > pypi_patch),
                     (
-                        f'Given version `{major}.{minor}.{patch}` not greater than '
-                        f'PyPI version `{pypi_major}.{pypi_minor}.{pypi_patch}`.'
+                        f'Given version, `{version_as_str(major, minor, patch)}`, not greater than '
+                        f'PyPI version, `{version_as_str(pypi_major, pypi_minor, pypi_patch)}`.'
                     ),
                     parser,
                 )

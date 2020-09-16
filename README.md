@@ -7,18 +7,18 @@ The name `tag2var` is meant to convey that the utility does everything from
 git tagging to file versioning and all in between and either side. In particular
 `tag2var`:
 
-1. Updates `py` and `pyi` file's `__version__` attribute with given incremented 
-[semantic version](https://semver.org).
+  1. Updates `py` and `pyi` file's `__version__` attribute with given incremented 
+  [semantic version](https://semver.org).
 
-2. Updates `version` attribute of `setup.py` as above (if `setup` exists).
+  2. Updates `version` attribute of `setup.py` as above (if `setup` exists).
 
-3. Git commits `*.py` and `*.pyi` (including `setup.py`) files with given description.
+  3. Git commits `*.py` and `*.pyi` (including `setup.py`) files with given description.
 
-4. Git tags git repository with given version and given description.
+  4. Git tags git repository with given version and given description.
 
-5. Pushes to remote git (if remote exists).
+  5. Pushes to remote git (if remote exists).
 
-6. Uploads to `PyPI` (if `setup.py` exists).
+  6. Uploads to `PyPI` (if `setup.py` exists).
 
 The whole program is in the single file, `tag2var.py`, (without any dependencies outside 
 of Python3.6+) and therefore this file alone can be copied to install the utility. 
