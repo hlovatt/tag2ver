@@ -18,7 +18,7 @@ git tagging to file versioning and all in between and either side. In particular
 
   5. Pushes to remote git (if remote exists).
 
-  6. Uploads to `PyPI` (if `setup.py` exists).
+  6. Uploads to `PyPI` or `Test PyPi` with `-t` option (if `setup.py` exists).
 
 The whole program is in the single file, `tag2var.py`, (without any dependencies outside 
 of Python3.6+) and therefore this file alone can be copied to install the utility. 
@@ -41,9 +41,10 @@ Usage from *folder with git repository to tag and source files to version*:
 
 Options:
 
-  * `-h` or `--help`, print this message (rest of command line ignored).
+  * `-h` or `--help`, print short help message (rest of command line ignored).
   * `-f` or `--force`, force the given git version (not PyPI) even if it is not a single 
   increment.
+  * `-t` or `--test_pypi`, use `Test PyPi` instead of `PyPi` (if `setup.py exists).
 
 Version:
 
@@ -86,7 +87,10 @@ Actions:
   with given description.
   * Tags the repository with given version and given description.
   * If `remote` repository exists, pushes `origin` to `master`.
-  * If `setup.py` exists, uploads to `PyPI` with given version.
+  * If `setup.py` exists, uploads to `PyPI` (or `Test PyPi` with `-t` option) with given 
+  version. Prompts for API Token (see 
+  [API Tokens](https://pypi.org/manage/account/#api-tokens) or
+  [Test API Tokens](https://test.pypi.org/manage/account/#api-tokens))
 
 EG:
 

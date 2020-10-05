@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.6"
+__version__ = "0.6.7"
 
 __all__ = ['main']
 
@@ -116,13 +116,19 @@ def version_as_str(major: int, minor: int, patch: int):
     return f'{major}.{minor}.{patch}'
 
 
-def version_setup_and_ensure_version_if_setup_exists(
+def ensure_setup_version_and_version_setup_if_setup_exists(
         major: int,
         minor: int,
         patch: int,
-        parser: argparse.ArgumentParser
+        parser: argparse.ArgumentParser,
+        args: argparse.Namespace,
 ):
     if not SETUP_PATH.is_file():
+        ensure(
+            not args.test_pipy,
+            '`Test PyPi specified but no `' + SETUP_NAME + '` file!',
+            parser
+        )
         return
     sub_str = r'\g<attr>\g<quote>' + version_as_str(major, minor, patch) + r'\g<quote>'
     version_found = False
@@ -211,16 +217,27 @@ def push_repository_if_remote_exists(major: int, minor: int, patch: int, parser:
         ensure_process(parser, 'git', 'push', '--atomic', 'origin', 'master', version_as_str(major, minor, patch))
 
 
-def publish_to_pypi_if_setup_exists(parser: argparse.ArgumentParser):
+def publish_to_pypi_if_setup_exists(parser: argparse.ArgumentParser, args: argparse.Namespace):
     if not SETUP_PATH.is_file():
         return
-    ensure_process(parser, 'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'setuptools', 'wheel')
+    ensure_process(
+        parser,
+        'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine'
+    )
     ensure_process(parser, 'python3', SETUP_NAME, 'sdist', 'bdist_wheel')
+    if args.test_pypi:
+        ensure_process(
+            parser,
+            'python3', '-m', 'twine', 'upload', '--repository', 'testpypi', '--username', '__token__', 'dist/*'
+        )
+    else:
+        ensure_process(parser, 'python3', '-m', 'twine', 'upload', '--username', '__token__', 'dist/*')
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
     parser.add_argument('-f', '--force', help='force tagging/versioning even if out of sequence', action='store_true')
+    parser.add_argument('-t', '--test_pypi', help='use `Test PyPi` instead of `PyPi`', action='store_true')
     parser.add_argument('version', help='tag/version number in format: `<Major>.<Minor>.<Patch>`')
     parser.add_argument('description', help='description of tag/commit')
     return parser, parser.parse_args()
@@ -232,7 +249,7 @@ def main():
     forced_version, version, description = args.force, args.version, args.description
     major, minor, patch = parse_version(version, parser)
     ensure_tag_version_if_not_forced(major, minor, patch, forced_version, parser)
-    version_setup_and_ensure_version_if_setup_exists(major, minor, patch, parser)
+    ensure_setup_version_and_version_setup_if_setup_exists(major, minor, patch, parser, args)
     version_files(major, minor, patch, parser)
     commit_files(description, parser)
     tag_repository(major, minor, patch, description, parser)
