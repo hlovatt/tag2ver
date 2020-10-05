@@ -8,7 +8,7 @@ def read_text(file_name: str):
 
 setuptools.setup(
     name='tag2ver-hlovatt',
-    version='0.6.3',
+    version='0.6.4',
     url='https://github.com/hlovatt/tag2ver',
     license=read_text('LICENSE'),
     author='Howard C Lovatt',

@@ -12,7 +12,7 @@ git tagging to file versioning and all in between and either side. In particular
 
   2. Updates `version` attribute of `setup.py` as above (if `setup` exists).
 
-  3. Git commits `*.py` and `*.pyi` (including `setup.py`) files with given description.
+  3. Git commits all modified files with given description.
 
   4. Git tags git repository with given version and given description.
 
@@ -58,8 +58,9 @@ Version:
     e.g. `__version__ = ''`.
     * Similarly `setup`, e.g. `version='0.0.0'` (must have a valid version though).
     * Since `setup` must contain a valid version the smallest version that can be in PyPi
-    is `0.0.1` (since version in `setup` must be increased). In practice this isn't a problem
-    since much development happens before ready for PyPI and therefore version already `>0.0.0`.
+    is `0.0.1` (since version in `setup` must be increased). In practice this isn't a 
+    problem since much development happens before ready for PyPI and therefore version 
+    already `>0.0.0`.
   * Leading zeros are allowed but ignored, e.g. `00.00.00` is the same as `0.0.0`.
   * Leading plus not allowed, e.g. `+0.0.0` is an error.
 

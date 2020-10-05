@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.3"
+__version__ = "0.6.4"
 
 __all__ = ['main']
 
@@ -211,9 +211,10 @@ def push_repository_if_remote_exists(major: int, minor: int, patch: int, parser:
         ensure_process(parser, 'git', 'push', '--atomic', 'origin', 'master', version_as_str(major, minor, patch))
 
 
-def publish_to_pypi_if_setup_exists():
+def publish_to_pypi_if_setup_exists(parser: argparse.ArgumentParser):
     if not SETUP_PATH.is_file():
         return
+    ensure_process(parser, 'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'setuptools', 'wheel')
 
 
 def parse_args():
