@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.5"
+__version__ = "0.6.6"
 
 __all__ = ['main']
 
@@ -215,6 +215,7 @@ def publish_to_pypi_if_setup_exists(parser: argparse.ArgumentParser):
     if not SETUP_PATH.is_file():
         return
     ensure_process(parser, 'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'setuptools', 'wheel')
+    ensure_process(parser, 'python3', SETUP_NAME, 'sdist', 'bdist_wheel')
 
 
 def parse_args():
