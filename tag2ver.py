@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.4"
+__version__ = "0.6.5"
 
 __all__ = ['main']
 
@@ -236,7 +236,7 @@ def main():
     commit_files(description, parser)
     tag_repository(major, minor, patch, description, parser)
     push_repository_if_remote_exists(major, minor, patch, parser)
-    publish_to_pypi_if_setup_exists()
+    publish_to_pypi_if_setup_exists(parser)
 
 
 if __name__ == '__main__':
