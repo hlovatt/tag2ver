@@ -8,7 +8,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.8"
+__version__ = "0.6.9"
 
 __all__ = ['main', 'replace_file']
 

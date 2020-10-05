@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.8"
+__version__ = "0.6.9"
 
 __all__ = ['main']
 
@@ -226,12 +226,9 @@ def publish_to_pypi_if_setup_exists(parser: argparse.ArgumentParser, args: argpa
     )
     ensure_process(parser, 'python3', SETUP_NAME, 'sdist', 'bdist_wheel')
     if args.test_pypi:
-        ensure_process(
-            parser,
-            'python3', '-m', 'twine', 'upload', '--repository', 'testpypi', '--username', '__token__', 'dist/*'
-        )
+        ensure_process(parser, 'python3', '-m', 'twine', 'upload', '--repository', 'testpypi', 'dist/*')
     else:
-        ensure_process(parser, 'python3', '-m', 'twine', 'upload', '--username', '__token__', 'dist/*')
+        ensure_process(parser, 'python3', '-m', 'twine', 'upload', 'dist/*')
 
 
 def parse_args():
