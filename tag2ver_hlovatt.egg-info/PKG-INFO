@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: tag2ver-hlovatt
-Version: 0.6.10
+Version: 0.6.11
 Summary: Easy release management: file versioning, git commit, git tagging, git remote, and PyPI.
 Home-page: https://github.com/hlovatt/tag2ver
 Author: Howard C Lovatt
@@ -61,6 +61,7 @@ Description: # `tag2var`
         ## Help Text
         
         Usage from *folder with git repository to tag and source files to version*:
+        
           *  `tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`, 
           if `tag2ver.py` is executable and on execution path.
           *  `<tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`,

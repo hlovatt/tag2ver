@@ -6,6 +6,7 @@ git remote and PyPI.
 The name `tag2var` is meant to convey that the utility does everything from 
 git tagging to file versioning and all in between and either side. In particular
 `tag2var`:
+
   1. Updates `py` and `pyi` file's `__version__` attribute with given incremented 
   [semantic version](https://semver.org).
 
@@ -23,7 +24,9 @@ The whole program is in the single file, `tag2var.py`, (without any dependencies
 of Python3.6+) and therefore this file alone can be copied to install the utility. 
 Alternatively:
 
-    pip3 install tag2ver
+```
+pip3 install tag2ver
+```
 
 `tag2ver` is careful to check everything before making changes, i.e. it is heavily
 biased to finding and reporting an error before attempting any actions.
@@ -39,6 +42,7 @@ Usage from *folder with git repository to tag and source files to version*:
   *  `python3 <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`.
 
 Options (order of options not important):
+
   * `-h` or `--help`, print short help message (rest of command line ignored).
   * `-f` or `--force`, force the given git (not PyPI) version even if it is not a single 
   increment.
@@ -46,7 +50,8 @@ Options (order of options not important):
   * `-u <Username>` or `--username <Username>`, for `PyPi`/`Test PyPi` (if `setup.py` exists).
   * `-p <Password>` or `--password <Password>`, for `PyPi`/`Test PyPi` (if `setup.py` exists).
 
-Version (must be the 1st non=option):
+Version (must be the 1st non-option):
+
   * Must be a [semantic version](https://semver.org) with format `<Major>.<Minor>.<Patch>`,
   where `Major`, `Minor`, and `Patch` are positive integers or zero.
   * Must be a single increment from previous git tag version, unless `-f` option given.
@@ -65,10 +70,12 @@ Version (must be the 1st non=option):
   * Leading plus not allowed, e.g. `+0.0.0` is an error.
 
 Description (must be the 2nd non-option):
+
   * Description of the version: a single, short, ideally < 50 characters, sentence with 
   an imperative mood (in double quotes to allow spaces).
 
 Actions `tag2ver` takes in order:
+
   * Checks git repository exists.
   * Checks version number is *a* single increment from last git tag (except `-f` option) 
   and of form `<Major>.<Minor>.<Patch>` and description exists.
@@ -90,6 +97,7 @@ Actions `tag2ver` takes in order:
   Username, `-u` or `--username`, and password, `-p` or `--password`, may optionally be specified.
 
 EG:
+
   * `<tag2ver dir>.tag2ver.py -h`, prints help.
   * `<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`, 
   for 1st release (note `-f` and note `0.0.0` cannot be pushed to PyPI).
