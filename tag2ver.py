@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.13"
+__version__ = "0.6.15"
 
 __all__ = ['main']
 
@@ -236,9 +236,31 @@ def parse_args():
     parser.add_argument('-f', '--force', help='force tagging/versioning even if out of sequence', action='store_true')
     parser.add_argument('version', help='tag/version number in format: `<Major>.<Minor>.<Patch>`')
     parser.add_argument('description', help='description of tag/commit')
-    parser.add_argument('-t', '--test_pypi', help='use `Test PyPi` instead of `PyPi`', action='store_true')
-    parser.add_argument('-u', '--username', help='username for `PyPi`/`Test PyPi`')
-    parser.add_argument('-p', '--password', help='password for `PyPi`/`Test PyPi`')
+    parser.add_argument(
+        '-t',
+        '--test_pypi',
+        help=(
+            'use `Test PyPi` instead of `PyPi` '
+            '(passes `--repository testpypi` onto [twine](https://twine.readthedocs.io/en/latest/)).'
+        ),
+        action='store_true'
+    )
+    parser.add_argument(
+        '-u',
+        '--username',
+        help=(
+            'username for `PyPi`/`Test PyPi`'
+            '(passed onto [twine](https://twine.readthedocs.io/en/latest/)).'
+        )
+    )
+    parser.add_argument(
+        '-p',
+        '--password',
+        help=(
+            'password for `PyPi`/`Test PyPi`'
+            '(passed onto [twine](https://twine.readthedocs.io/en/latest/)).'
+        )
+    )
     return parser, parser.parse_args()
 
 

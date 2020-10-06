@@ -9,25 +9,18 @@ git tagging to file versioning and all in between and either side. In particular
 
   1. Updates `py` and `pyi` file's `__version__` attribute with given incremented 
   [semantic version](https://semver.org).
-
   2. Updates `version` attribute of `setup.py` as above (if `setup` exists).
-
   3. Git commits all modified files with given description.
-
   4. Git tags git repository with given version and given description.
-
   5. Pushes to remote git (if remote exists).
-
   6. Uploads to `PyPI` or `Test PyPi` with `-t` option (if `setup.py` exists).
 
 The whole program is in the single file, `tag2var.py`, (without any dependencies outside 
 of Python3.6+) and therefore this file alone can be copied to install the utility. 
 Alternatively:
-
 ```
 pip3 install tag2ver
 ```
-
 `tag2ver` is careful to check everything before making changes, i.e. it is heavily
 biased to finding and reporting an error before attempting any actions.
 
@@ -47,8 +40,11 @@ Options (order of options not important):
   * `-f` or `--force`, force the given git (not PyPI) version even if it is not a single 
   increment.
   * `-t` or `--test_pypi`, use `Test PyPi` instead of `PyPi` (if `setup.py` exists).
+  (Passes `--repository testpypi` onto [twine](https://twine.readthedocs.io/en/latest/).)
   * `-u <Username>` or `--username <Username>`, for `PyPi`/`Test PyPi` (if `setup.py` exists).
+  (Passed onto [twine](https://twine.readthedocs.io/en/latest/).)
   * `-p <Password>` or `--password <Password>`, for `PyPi`/`Test PyPi` (if `setup.py` exists).
+  (Passed onto [twine](https://twine.readthedocs.io/en/latest/).)
 
 Version (must be the 1st non-option):
 
@@ -59,7 +55,7 @@ Version (must be the 1st non-option):
   (`-f` not considered for PyPI version comparison).
   * Use: `<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."` 
   (or similar), for 1st tagging in repository. Note:
-  
+
     * `py` and `pyi` files still need version attr (though it can be an empty string), 
     e.g. `__version__ = ''`.
     * Similarly `setup`, e.g. `version='0.0.0'` (must have a valid version though).
@@ -67,7 +63,7 @@ Version (must be the 1st non-option):
     is `0.0.1` (since version in `setup` must be increased). In practice this isn't a 
     problem since much development happens before ready for PyPI and therefore version 
     already `>0.0.0`.
-    
+
   * Leading zeros are allowed but ignored, e.g. `00.00.00` is the same as `0.0.0`.
   * Leading plus not allowed, e.g. `+0.0.0` is an error.
 
@@ -82,12 +78,12 @@ Actions `tag2ver` takes in order:
   * Checks version number is *a* single increment from last git tag (except `-f` option) 
   and of form `<Major>.<Minor>.<Patch>` and description exists.
   * Checks if PyPI deployed (`setup.py` must exist):
-  
+
     * Checks version number is at least one increment from last PyPI deployment 
     (regardless of `-f` option - PyPi versioning cannot be overridden).
     * Updates `setup.py`'s `version` attribute with given version 
     (`version` kwarg must already exist).
-    
+
   * Updates the `__version__` attribute of all the `py`, except `setup.py` (see above), 
   and `pyi` file's in the 
   current directory and sub-directories with given version 
@@ -98,7 +94,10 @@ Actions `tag2ver` takes in order:
   * If `remote` repository exists, pushes `origin` to `master`.
   * If `setup.py` exists, uploads to `PyPI` (or `Test PyPi` with `-t` option) with given 
   version. 
-  Username, `-u` or `--username`, and password, `-p` or `--password`, may optionally be specified.
+  Username, `-u` or `--username`, and password, `-p` or `--password`, 
+  may optionally be specified.
+  (Upload uses [twine](https://twine.readthedocs.io/en/latest/), 
+  see link for other options for specifying username and password.)
 
 EG:
 
