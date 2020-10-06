@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.9"
+__version__ = "0.6.10"
 
 __all__ = ['main']
 
@@ -225,18 +225,20 @@ def publish_to_pypi_if_setup_exists(parser: argparse.ArgumentParser, args: argpa
         'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine'
     )
     ensure_process(parser, 'python3', SETUP_NAME, 'sdist', 'bdist_wheel')
-    if args.test_pypi:
-        ensure_process(parser, 'python3', '-m', 'twine', 'upload', '--repository', 'testpypi', 'dist/*')
-    else:
-        ensure_process(parser, 'python3', '-m', 'twine', 'upload', 'dist/*')
+    repository = ['--repository', 'testpypi'] if args.test_pypi else []
+    username = ['--username', args.username] if args.username else []
+    password = ['--password', args.password] if args.password else []
+    ensure_process(parser, 'python3', '-m', 'twine', 'upload', *repository, *username, *password, 'dist/*')
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
     parser.add_argument('-f', '--force', help='force tagging/versioning even if out of sequence', action='store_true')
-    parser.add_argument('-t', '--test_pypi', help='use `Test PyPi` instead of `PyPi`', action='store_true')
     parser.add_argument('version', help='tag/version number in format: `<Major>.<Minor>.<Patch>`')
     parser.add_argument('description', help='description of tag/commit')
+    parser.add_argument('-t', '--test_pypi', help='use `Test PyPi` instead of `PyPi`', action='store_true')
+    parser.add_argument('-u', '--username', help='username for `PyPi`/`Test PyPi`')
+    parser.add_argument('-p', '--password', help='password for `PyPi`/`Test PyPi`')
     return parser, parser.parse_args()
 
 
