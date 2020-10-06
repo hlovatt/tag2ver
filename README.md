@@ -59,6 +59,7 @@ Version (must be the 1st non-option):
   (`-f` not considered for PyPI version comparison).
   * Use: `<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."` 
   (or similar), for 1st tagging in repository. Note:
+  
     * `py` and `pyi` files still need version attr (though it can be an empty string), 
     e.g. `__version__ = ''`.
     * Similarly `setup`, e.g. `version='0.0.0'` (must have a valid version though).
@@ -66,6 +67,7 @@ Version (must be the 1st non-option):
     is `0.0.1` (since version in `setup` must be increased). In practice this isn't a 
     problem since much development happens before ready for PyPI and therefore version 
     already `>0.0.0`.
+    
   * Leading zeros are allowed but ignored, e.g. `00.00.00` is the same as `0.0.0`.
   * Leading plus not allowed, e.g. `+0.0.0` is an error.
 
@@ -79,11 +81,13 @@ Actions `tag2ver` takes in order:
   * Checks git repository exists.
   * Checks version number is *a* single increment from last git tag (except `-f` option) 
   and of form `<Major>.<Minor>.<Patch>` and description exists.
-  * Checks if PyPI deployed (`setup.py` must exist).
+  * Checks if PyPI deployed (`setup.py` must exist):
+  
     * Checks version number is at least one increment from last PyPI deployment 
     (regardless of `-f` option - PyPi versioning cannot be overridden).
     * Updates `setup.py`'s `version` attribute with given version 
     (`version` kwarg must already exist).
+    
   * Updates the `__version__` attribute of all the `py`, except `setup.py` (see above), 
   and `pyi` file's in the 
   current directory and sub-directories with given version 
