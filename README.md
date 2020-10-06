@@ -31,6 +31,7 @@ biased to finding and reporting an error before attempting any actions.
 ## Help Text
 
 Usage from *folder with git repository to tag and source files to version*:
+
   *  `tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`, 
   if `tag2ver.py` is executable and on execution path.
   *  `<tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`,
