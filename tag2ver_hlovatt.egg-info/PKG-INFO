@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: tag2ver-hlovatt
-Version: 0.6.18
+Version: 0.6.19
 Summary: Easy release management: file versioning, git commit, git tagging, git remote, and PyPI.
 Home-page: https://github.com/hlovatt/tag2ver
 Author: Howard C Lovatt
@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-Description: See <https://github.com/hlovatt/tag2ver/README.md> for details.
+Description: See <https://github.com/hlovatt/tag2ver/d> for details.
 Platform: any
 Classifier: Intended Audience :: Developers
 Classifier: Programming Language :: Python :: 3

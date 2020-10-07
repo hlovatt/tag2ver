@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.18"
+__version__ = "0.6.19"
 
 __all__ = ['main']
 
@@ -274,7 +274,11 @@ def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
 
 
 def parse_args():
-    PARSER.add_argument('-V', '--version', help="show program's version number and exit", action='store_true')
+    PARSER.add_argument(
+        '-V', '--version',
+        help="show program's version number and exit",
+        action='version',
+        version='%(prog)s ' + __version__)
     PARSER.add_argument('-f', '--force_tag', help='force tag version even if out of sequence', action='store_true')
     PARSER.add_argument('tag_version', help='tag and file version number in format: `<Major>.<Minor>.<Patch>`')
     PARSER.add_argument('tag_description', help='description for tag and commit')
@@ -283,7 +287,7 @@ def parse_args():
         '--test_pypi',
         help=(
             'use `Test PyPi` instead of `PyPi` '
-            '(passes `--repository testpypi` onto [twine](https://twine.readthedocs.io/en/latest/)).'
+            '(passes `--repository testpypi` onto twine (https://twine.readthedocs.io/en/latest/).'
         ),
         action='store_true'
     )
@@ -292,7 +296,7 @@ def parse_args():
         '--username',
         help=(
             'username for `PyPi`/`Test PyPi` '
-            '(passed onto [twine](https://twine.readthedocs.io/en/latest/)).'
+            '(passed onto twine (https://twine.readthedocs.io/en/latest/).'
         )
     )
     PARSER.add_argument(
@@ -300,7 +304,7 @@ def parse_args():
         '--password',
         help=(
             'password for `PyPi`/`Test PyPi` '
-            '(passed onto [twine](https://twine.readthedocs.io/en/latest/)).'
+            '(passed onto twine (https://twine.readthedocs.io/en/latest/).'
         )
     )
     return PARSER.parse_args()
@@ -308,9 +312,6 @@ def parse_args():
 
 def main():
     args = parse_args()
-    if args.version:
-        print(__version__)
-        exit(0)
     ensure_git_exists()
     forced_version, version, description = args.force_tag, args.tag_version, args.tag_description
     major, minor, patch = parse_version(version)
