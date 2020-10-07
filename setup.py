@@ -15,7 +15,7 @@ setuptools.setup(
     author_email='howard.lovatt@gmail.com',
     description='Easy release management: file versioning, git commit, git tagging, git remote, and PyPI.',
     # read_text('README.md') doesn't work because PyPi can't render README.md - PyPi bug.
-    long_description='See <https://github.com/hlovatt/tag2ver/README.md> for details.',  # read_text('README.md'),
+    long_description=read_text('README.md'), # 'See <https://github.com/hlovatt/tag2ver/README.md> for details.',  # read_text('README.md'),
     long_description_content_type='text/markdown',
     py_modules=['tag2ver'],
     classifiers=[
