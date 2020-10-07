@@ -37,6 +37,7 @@ Usage from *folder with git repository to tag and source files to version*:
 Options (order of options not important):
 
   * `-h` or `--help`, print short help message (rest of command line ignored).
+  * `--version`, print version number of `tag2ver` (rest of command line ignored).
   * `-f` or `--force`, force the given git (not PyPI) version even if it is not a single 
   increment.
   * `-t` or `--test_pypi`, use `Test PyPi` instead of `PyPi` (if `setup.py` exists).
@@ -46,7 +47,7 @@ Options (order of options not important):
   * `-p <Password>` or `--password <Password>`, for `PyPi`/`Test PyPi` (if `setup.py` exists).
   (Passed onto [twine](https://twine.readthedocs.io/en/latest/).)
 
-Version (must be the 1st non-option):
+Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
 
   * Must be a [semantic version](https://semver.org) with format `<Major>.<Minor>.<Patch>`,
   where `Major`, `Minor`, and `Patch` are positive integers or zero.
@@ -67,7 +68,7 @@ Version (must be the 1st non-option):
   * Leading zeros are allowed but ignored, e.g. `00.00.00` is the same as `0.0.0`.
   * Leading plus not allowed, e.g. `+0.0.0` is an error.
 
-Description (must be the 2nd non-option):
+Description usually in quotes (must be the 2nd non-option):
 
   * Description of the version: a single, short, ideally < 50 characters, sentence with 
   an imperative mood (in double quotes to allow spaces).

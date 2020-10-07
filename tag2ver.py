@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.15"
+__version__ = "0.6.13"
 
 __all__ = ['main']
 
@@ -19,7 +19,7 @@ import sys
 
 from pathlib import Path
 
-from typing import List
+from typing import List, Callable
 
 VERSION_RE_STR = r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
 VERSION_RE = re.compile(r'^' + VERSION_RE_STR + r'$')
@@ -30,17 +30,18 @@ SETUP_VERSION_RE = re.compile(r'(?P<attr>version\s*=\s*)(?P<quote>["|' + r"'])" 
 HELP_TEXT = 'Easy release management: file versioning, git commit, git tagging, and  optionally git remote and PyPI.'
 
 
-def ensure(condition: bool, msg: str, parser: argparse.ArgumentParser):
+def ensure(condition: bool, msg: str, parser: argparse.ArgumentParser, rollback: Callable[[], None] = lambda: None):
     """Similar to `assert`, except that it prints the help message instead of a stack trace and is always enabled."""
     if condition:
         return
+    rollback()
     parser.print_help(sys.stderr)
     print(file=sys.stderr)
     print(msg, file=sys.stderr)
     exit(1)
 
 
-def ensure_process(parser: argparse.ArgumentParser, *cmd: str):
+def ensure_process(*cmd: str, parser: argparse.ArgumentParser, rollback: Callable[[], None] = lambda: None):
     process = subprocess.run(
         cmd,
         capture_output=True,
@@ -48,8 +49,9 @@ def ensure_process(parser: argparse.ArgumentParser, *cmd: str):
     )
     ensure(
         process.returncode == 0,
-        f'Sub-process `{process.args}` returned {process.returncode}',
+        f'Sub-process `{process.args}` returned code {process.returncode} with error message `{process.stderr}`',
         parser,
+        rollback,
     )
     return process
 
@@ -85,7 +87,7 @@ def ensure_tag_version_if_not_forced(
 ):
     if forced_version:
         return
-    git_tag_list_process = ensure_process(parser, 'git', 'tag')
+    git_tag_list_process = ensure_process('git', 'tag', parser=parser)
     last_version = ''  # Doesn't do anything other than keep PyCharm control flow happy!
     try:
         last_version = git_tag_list_process.stdout.split()[-1]
@@ -105,11 +107,29 @@ def ensure_tag_version_if_not_forced(
     )
 
 
-def replace_file(path: Path, new_text: List[str]):
+def make_back_path(path: Path):
     bak_path = path.with_suffix('.bak')
+    return bak_path
+
+
+def delete_backup_file(path: Path):
+    make_back_path(path).unlink()
+
+
+def replace_file(path: Path, new_text: List[str], delete_backup: bool = True):
+    bak_path = make_back_path(path)
     path.rename(bak_path)
     path.write_text(''.join(new_text))
-    bak_path.unlink()
+    if delete_backup:
+        delete_backup_file(path)
+
+
+def rollback_replace_file(path: Path):
+    make_back_path(path).rename(path)
+
+
+def rollback_setup_version_change():
+    rollback_replace_file(SETUP_PATH)
 
 
 def version_as_str(major: int, minor: int, patch: int):
@@ -173,7 +193,23 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
         f'No "version" line found in `{SETUP_NAME}` (RE is `{SETUP_VERSION_RE}`).',
         parser,
     )
-    replace_file(SETUP_PATH, new_setup)
+    replace_file(SETUP_PATH, new_setup, delete_backup=False)
+    ensure_process(
+        'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine',
+        parser=parser,
+        rollback=rollback_setup_version_change,
+    )
+    ensure_process(
+        'python3', SETUP_NAME, 'sdist', 'bdist_wheel',
+        parser=parser,
+        rollback=rollback_setup_version_change,
+    )
+    ensure_process(
+        'python3', '-m', 'twine', 'check', 'dist/*',
+        parser=parser,
+        rollback=rollback_setup_version_change,
+    )
+    delete_backup_file(SETUP_PATH)
 
 
 def version_files(major: int, minor: int, patch: int, parser: argparse.ArgumentParser):
@@ -201,11 +237,14 @@ def version_files(major: int, minor: int, patch: int, parser: argparse.ArgumentP
 
 
 def commit_files(description: str, parser: argparse.ArgumentParser):
-    ensure_process(parser, 'git', 'commit', '-am', f'"{description}"')
+    ensure_process('git', 'commit', '-am', f'"{description}"', parser=parser)
 
 
 def tag_repository(major: int, minor: int, patch: int, description: str, parser: argparse.ArgumentParser):
-    ensure_process(parser, 'git', 'tag', '-a', f'{version_as_str(major, minor, patch)}', '-m', f'"{description}"')
+    ensure_process(
+        'git', 'tag', '-a', f'{version_as_str(major, minor, patch)}', '-m', f'"{description}"',
+        parser=parser,
+    )
 
 
 def push_repository_if_remote_exists(major: int, minor: int, patch: int, parser: argparse.ArgumentParser):
@@ -214,28 +253,30 @@ def push_repository_if_remote_exists(major: int, minor: int, patch: int, parser:
         capture_output=True,
     )
     if git_check_remote_process.returncode == 0 and bool(git_check_remote_process.stdout):
-        ensure_process(parser, 'git', 'push', '--atomic', 'origin', 'master', version_as_str(major, minor, patch))
+        ensure_process(
+            'git', 'push', '--atomic', 'origin', 'master', version_as_str(major, minor, patch),
+            parser=parser,
+        )
 
 
 def publish_to_pypi_if_setup_exists(parser: argparse.ArgumentParser, args: argparse.Namespace):
     if not SETUP_PATH.is_file():
         return
-    ensure_process(
-        parser,
-        'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine'
-    )
-    ensure_process(parser, 'python3', SETUP_NAME, 'sdist', 'bdist_wheel')
     repository = ['--repository', 'testpypi'] if args.test_pypi else []
     username = ['--username', args.username] if args.username else []
     password = ['--password', args.password] if args.password else []
-    ensure_process(parser, 'python3', '-m', 'twine', 'upload', *repository, *username, *password, 'dist/*')
+    ensure_process(
+        'python3', '-m', 'twine', 'upload', *repository, *username, *password, 'dist/*',
+        parser=parser,
+    )
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
-    parser.add_argument('-f', '--force', help='force tagging/versioning even if out of sequence', action='store_true')
-    parser.add_argument('version', help='tag/version number in format: `<Major>.<Minor>.<Patch>`')
-    parser.add_argument('description', help='description of tag/commit')
+    parser.add_argument('--version', help="show program's version number and exit", action='store_true')
+    parser.add_argument('-f', '--force_tag', help='force tagging/versioning even if out of sequence', action='store_true')
+    parser.add_argument('tag_version', help='tag/version number in format: `<Major>.<Minor>.<Patch>`')
+    parser.add_argument('tag_description', help='description of tag/commit')
     parser.add_argument(
         '-t',
         '--test_pypi',
@@ -266,8 +307,11 @@ def parse_args():
 
 def main():
     parser, args = parse_args()
+    if args.version:
+        print(__version__)
+        exit(0)
     ensure_git_exists(parser)
-    forced_version, version, description = args.force, args.version, args.description
+    forced_version, version, description = args.force_tag, args.tag_version, args.tag_description
     major, minor, patch = parse_version(version, parser)
     ensure_tag_version_if_not_forced(major, minor, patch, forced_version, parser)
     ensure_setup_version_and_version_setup_if_setup_exists(major, minor, patch, parser, args)
