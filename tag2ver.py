@@ -12,6 +12,7 @@ __version__ = "0.6.13"
 __all__ = ['main']
 
 import argparse
+import glob
 import os
 import re
 import subprocess
@@ -28,20 +29,22 @@ SETUP_NAME = 'setup.py'
 SETUP_PATH = Path(SETUP_NAME)
 SETUP_VERSION_RE = re.compile(r'(?P<attr>version\s*=\s*)(?P<quote>["|' + r"'])" + VERSION_RE_STR + r'(?P=quote)')
 HELP_TEXT = 'Easy release management: file versioning, git commit, git tagging, and  optionally git remote and PyPI.'
+DIST_FILES_PATTERN = os.path.join('dist', '*')
+PARSER = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
 
 
-def ensure(condition: bool, msg: str, parser: argparse.ArgumentParser, rollback: Callable[[], None] = lambda: None):
+def ensure(condition: bool, msg: str, *, rollback: Callable[[], None] = lambda: None):
     """Similar to `assert`, except that it prints the help message instead of a stack trace and is always enabled."""
     if condition:
         return
     rollback()
-    parser.print_help(sys.stderr)
+    PARSER.print_help(sys.stderr)
     print(file=sys.stderr)
     print(msg, file=sys.stderr)
     exit(1)
 
 
-def ensure_process(*cmd: str, parser: argparse.ArgumentParser, rollback: Callable[[], None] = lambda: None):
+def ensure_process(*cmd: str, rollback: Callable[[], None] = lambda: None):
     process = subprocess.run(
         cmd,
         capture_output=True,
@@ -50,13 +53,12 @@ def ensure_process(*cmd: str, parser: argparse.ArgumentParser, rollback: Callabl
     ensure(
         process.returncode == 0,
         f'Sub-process `{process.args}` returned code {process.returncode} with error message `{process.stderr}`',
-        parser,
-        rollback,
+        rollback=rollback,
     )
     return process
 
 
-def ensure_git_exists(parser: argparse.ArgumentParser):
+def ensure_git_exists():
     git_check_process = subprocess.run(
         ['git', 'ls-files'],
         capture_output=True,
@@ -64,16 +66,14 @@ def ensure_git_exists(parser: argparse.ArgumentParser):
     ensure(
         git_check_process.returncode == 0 and git_check_process.stdout,
         f'Current directory, {os.getcwd()}, does not have a git repository with at least one file.',
-        parser,
     )
 
 
-def parse_version(version: str, parser: argparse.ArgumentParser):
+def parse_version(version: str):
     version_match = VERSION_RE.match(version)
     ensure(
         bool(version_match),
         f'Given `{version}` not of form `<Major>.<Minor>.<Patch>` (RE is `{VERSION_RE}`).',
-        parser,
     )
     return int(version_match.group('major')), int(version_match.group('minor')), int(version_match.group('patch'))
 
@@ -83,11 +83,10 @@ def ensure_tag_version_if_not_forced(
         minor: int,
         patch: int,
         forced_version: bool,
-        parser: argparse.ArgumentParser
 ):
     if forced_version:
         return
-    git_tag_list_process = ensure_process('git', 'tag', parser=parser)
+    git_tag_list_process = ensure_process('git', 'tag')
     last_version = ''  # Doesn't do anything other than keep PyCharm control flow happy!
     try:
         last_version = git_tag_list_process.stdout.split()[-1]
@@ -95,15 +94,13 @@ def ensure_tag_version_if_not_forced(
         ensure(
             False,  # Always causes error message to print and then exit program.
             f'No previous tags, perhaps `<tag2ver dir>.tag2ver.py -f v0.0.0 "Add initial tag and version."`?',
-            parser
         )
-    last_major, last_minor, last_patch = parse_version(last_version, parser)
+    last_major, last_minor, last_patch = parse_version(last_version)
     ensure(
         (major == last_major + 1 and minor == 0 and patch == 0) or
         (major == last_major and minor == last_minor + 1 and patch == 0) or
         (major == last_major and minor == last_minor and patch == last_patch + 1),
         f'{version_as_str(major, minor, patch)} not a single increment from {last_version}.',
-        parser,
     )
 
 
@@ -136,18 +133,27 @@ def version_as_str(major: int, minor: int, patch: int):
     return f'{major}.{minor}.{patch}'
 
 
+def dist_files():
+    return set(glob.iglob(DIST_FILES_PATTERN))
+
+
 def ensure_setup_version_and_version_setup_if_setup_exists(
         major: int,
         minor: int,
         patch: int,
-        parser: argparse.ArgumentParser,
         args: argparse.Namespace,
 ):
+    """
+    Checks if `setup` exists and if it does:
+      * Checks that given version is an increment of existing version.
+      * Updates `version` keyword argument in `setup`.
+      * Generates files for `PyPi`/`Test PyPi`.
+      * If anything fails, exits `tag2ver` and undoes any changes made.
+    """
     if not SETUP_PATH.is_file():
         ensure(
             not args.test_pipy,
             '`Test PyPi specified but no `' + SETUP_NAME + '` file!',
-            parser
         )
         return
     sub_str = r'\g<attr>\g<quote>' + version_as_str(major, minor, patch) + r'\g<quote>'
@@ -159,7 +165,6 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
             ensure(
                 num_subs < 2,
                 f'More than one "version" kwarg found in `{SETUP_NAME}` on line `{line}` (RE is `{SETUP_VERSION_RE}`).',
-                parser,
             )
             if num_subs > 0:
                 ensure(
@@ -168,7 +173,6 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
                         f'2nd "version" kwarg line found in `{SETUP_NAME}`, '
                         f'2nd line is `{line}` (RE is `{SETUP_VERSION_RE}`).'
                     ),
-                    parser,
                 )
                 version_found = True
                 matched_version = SETUP_VERSION_RE.search(line)
@@ -185,34 +189,41 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
                         f'Given version, `{version_as_str(major, minor, patch)}`, not greater than '
                         f'PyPI version, `{version_as_str(pypi_major, pypi_minor, pypi_patch)}`.'
                     ),
-                    parser,
                 )
             new_setup.append(new_line)
     ensure(
         version_found,
         f'No "version" line found in `{SETUP_NAME}` (RE is `{SETUP_VERSION_RE}`).',
-        parser,
     )
     replace_file(SETUP_PATH, new_setup, delete_backup=False)
     ensure_process(
         'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine',
-        parser=parser,
         rollback=rollback_setup_version_change,
     )
+    existing_files = dist_files()
+
+    def created_files():
+        return dist_files().difference(existing_files)
+
+    def rollback_setup_version_change_and_delete_new_files():
+        for created_file in created_files():
+            Path(created_file).unlink()
+        rollback_setup_version_change()
+
     ensure_process(
         'python3', SETUP_NAME, 'sdist', 'bdist_wheel',
-        parser=parser,
-        rollback=rollback_setup_version_change,
+        rollback=rollback_setup_version_change_and_delete_new_files,
     )
     ensure_process(
-        'python3', '-m', 'twine', 'check', 'dist/*',
-        parser=parser,
-        rollback=rollback_setup_version_change,
+        'python3', '-m', 'twine', 'check', DIST_FILES_PATTERN,
+        rollback=rollback_setup_version_change_and_delete_new_files,
     )
     delete_backup_file(SETUP_PATH)
+    for new_file in created_files():
+        ensure_process('git', 'add', new_file)
 
 
-def version_files(major: int, minor: int, patch: int, parser: argparse.ArgumentParser):
+def version_files(major: int, minor: int, patch: int):
     paths = list(Path().rglob("*.py"))
     paths.extend(Path().rglob("*.pyi"))
     for path in paths:
@@ -223,7 +234,6 @@ def version_files(major: int, minor: int, patch: int, parser: argparse.ArgumentP
             ensure(
                 f'\n{VERSION_ATTR}' in text,
                 f'File `{path}` does not have a line beginning `{VERSION_ATTR}`.',
-                parser,
             )
     for path in paths:
         new_file: List[str] = []
@@ -236,48 +246,37 @@ def version_files(major: int, minor: int, patch: int, parser: argparse.ArgumentP
         replace_file(path, new_file)
 
 
-def commit_files(description: str, parser: argparse.ArgumentParser):
-    ensure_process('git', 'commit', '-am', f'"{description}"', parser=parser)
+def commit_files(description: str):
+    ensure_process('git', 'commit', '-am', f'"{description}"')
 
 
-def tag_repository(major: int, minor: int, patch: int, description: str, parser: argparse.ArgumentParser):
-    ensure_process(
-        'git', 'tag', '-a', f'{version_as_str(major, minor, patch)}', '-m', f'"{description}"',
-        parser=parser,
-    )
+def tag_repository(major: int, minor: int, patch: int, description: str):
+    ensure_process('git', 'tag', '-a', f'{version_as_str(major, minor, patch)}', '-m', f'"{description}"')
 
 
-def push_repository_if_remote_exists(major: int, minor: int, patch: int, parser: argparse.ArgumentParser):
-    git_check_remote_process = subprocess.run(
-        ['git', 'ls-remote'],
-        capture_output=True,
-    )
+def push_repository_if_remote_exists(major: int, minor: int, patch: int):
+    git_check_remote_process = subprocess.run(['git', 'ls-remote'], capture_output=True)
     if git_check_remote_process.returncode == 0 and bool(git_check_remote_process.stdout):
-        ensure_process(
-            'git', 'push', '--atomic', 'origin', 'master', version_as_str(major, minor, patch),
-            parser=parser,
-        )
+        ensure_process('git', 'push', '--atomic', 'origin', 'master', version_as_str(major, minor, patch))
 
 
-def publish_to_pypi_if_setup_exists(parser: argparse.ArgumentParser, args: argparse.Namespace):
+def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
     if not SETUP_PATH.is_file():
         return
     repository = ['--repository', 'testpypi'] if args.test_pypi else []
     username = ['--username', args.username] if args.username else []
     password = ['--password', args.password] if args.password else []
     ensure_process(
-        'python3', '-m', 'twine', 'upload', *repository, *username, *password, 'dist/*',
-        parser=parser,
+        'python3', '-m', 'twine', 'upload', *repository, *username, *password, DIST_FILES_PATTERN,
     )
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
-    parser.add_argument('--version', help="show program's version number and exit", action='store_true')
-    parser.add_argument('-f', '--force_tag', help='force tagging/versioning even if out of sequence', action='store_true')
-    parser.add_argument('tag_version', help='tag/version number in format: `<Major>.<Minor>.<Patch>`')
-    parser.add_argument('tag_description', help='description of tag/commit')
-    parser.add_argument(
+    PARSER.add_argument('--version', help="show program's version number and exit", action='store_true')
+    PARSER.add_argument('-f', '--force_tag', help='force tag version even if out of sequence', action='store_true')
+    PARSER.add_argument('tag_version', help='tag and file version number in format: `<Major>.<Minor>.<Patch>`')
+    PARSER.add_argument('tag_description', help='description for tag and commit')
+    PARSER.add_argument(
         '-t',
         '--test_pypi',
         help=(
@@ -286,7 +285,7 @@ def parse_args():
         ),
         action='store_true'
     )
-    parser.add_argument(
+    PARSER.add_argument(
         '-u',
         '--username',
         help=(
@@ -294,7 +293,7 @@ def parse_args():
             '(passed onto [twine](https://twine.readthedocs.io/en/latest/)).'
         )
     )
-    parser.add_argument(
+    PARSER.add_argument(
         '-p',
         '--password',
         help=(
@@ -302,24 +301,24 @@ def parse_args():
             '(passed onto [twine](https://twine.readthedocs.io/en/latest/)).'
         )
     )
-    return parser, parser.parse_args()
+    return PARSER.parse_args()
 
 
 def main():
-    parser, args = parse_args()
+    args = parse_args()
     if args.version:
         print(__version__)
         exit(0)
-    ensure_git_exists(parser)
+    ensure_git_exists()
     forced_version, version, description = args.force_tag, args.tag_version, args.tag_description
-    major, minor, patch = parse_version(version, parser)
-    ensure_tag_version_if_not_forced(major, minor, patch, forced_version, parser)
-    ensure_setup_version_and_version_setup_if_setup_exists(major, minor, patch, parser, args)
-    version_files(major, minor, patch, parser)
-    commit_files(description, parser)
-    tag_repository(major, minor, patch, description, parser)
-    push_repository_if_remote_exists(major, minor, patch, parser)
-    publish_to_pypi_if_setup_exists(parser, args)
+    major, minor, patch = parse_version(version)
+    ensure_tag_version_if_not_forced(major, minor, patch, forced_version)
+    ensure_setup_version_and_version_setup_if_setup_exists(major, minor, patch, args)
+    version_files(major, minor, patch)
+    commit_files(description)
+    tag_repository(major, minor, patch, description)
+    push_repository_if_remote_exists(major, minor, patch)
+    publish_to_pypi_if_setup_exists(args)
 
 
 if __name__ == '__main__':
