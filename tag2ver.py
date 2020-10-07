@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.17"
+__version__ = "0.6.18"
 
 __all__ = ['main']
 
@@ -89,11 +89,13 @@ def ensure_tag_version_if_not_forced(
     git_tag_list_process = ensure_process('git', 'tag')
     last_version = ''  # Doesn't do anything other than keep PyCharm control flow happy!
     try:
-        last_version = git_tag_list_process.stdout.split()[-1]
+        versions = git_tag_list_process.stdout.split()
+        versions.sort(key=parse_version)
+        last_version = versions[-1]
     except IndexError:
         ensure(
             False,  # Always causes error message to print and then exit program.
-            f'No previous tags, perhaps `<tag2ver dir>.tag2ver.py -f v0.0.0 "Add initial tag and version."`?',
+            f'No previous tags, perhaps `<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`?',
         )
     last_major, last_minor, last_patch = parse_version(last_version)
     ensure(
