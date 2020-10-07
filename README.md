@@ -21,7 +21,6 @@ git tagging to file versioning and all in between and either side. In particular
 
   6. Uploads to ``PyPI`` or ``Test PyPi`` with ``-t`` option (if ``setup.py`` exists).
 
-
 The whole program is in the single file, ``tag2var.py``, (without any dependencies outside 
 of Python3.6+) and therefore this file alone can be copied to install the utility. 
 Alternatively::
@@ -30,7 +29,6 @@ Alternatively::
 
 ``tag2ver`` is careful to check everything before making changes, i.e. it is heavily
 biased to finding and reporting an error before attempting any actions.
-
 
 Help Text
 ---------
