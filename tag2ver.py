@@ -52,7 +52,7 @@ def ensure_process(*cmd: str, rollback: Callable[[], None] = lambda: None):
     )
     ensure(
         process.returncode == 0,
-        f'Sub-process `{process.args}` returned code {process.returncode} with error message `{process.stderr}`',
+        f'Sub-process `{process.args}` failed with exit code {process.returncode} and error message `{process.stdout}`',
         rollback=rollback,
     )
     return process
@@ -272,7 +272,7 @@ def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
 
 
 def parse_args():
-    PARSER.add_argument('--version', help="show program's version number and exit", action='store_true')
+    PARSER.add_argument('-V', '--version', help="show program's version number and exit", action='store_true')
     PARSER.add_argument('-f', '--force_tag', help='force tag version even if out of sequence', action='store_true')
     PARSER.add_argument('tag_version', help='tag and file version number in format: `<Major>.<Minor>.<Patch>`')
     PARSER.add_argument('tag_description', help='description for tag and commit')
@@ -289,7 +289,7 @@ def parse_args():
         '-u',
         '--username',
         help=(
-            'username for `PyPi`/`Test PyPi`'
+            'username for `PyPi`/`Test PyPi` '
             '(passed onto [twine](https://twine.readthedocs.io/en/latest/)).'
         )
     )
@@ -297,7 +297,7 @@ def parse_args():
         '-p',
         '--password',
         help=(
-            'password for `PyPi`/`Test PyPi`'
+            'password for `PyPi`/`Test PyPi` '
             '(passed onto [twine](https://twine.readthedocs.io/en/latest/)).'
         )
     )
