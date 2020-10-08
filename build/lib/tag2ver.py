@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.19"
+__version__ = "0.6.20"
 
 __all__ = ['main']
 
@@ -198,31 +198,6 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
         f'No "version" line found in `{SETUP_NAME}` (RE is `{SETUP_VERSION_RE}`).',
     )
     replace_file(SETUP_PATH, new_setup, delete_backup=False)
-    ensure_process(
-        'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine',
-        rollback=rollback_setup_version_change,
-    )
-    existing_files = dist_files()
-
-    def created_files():
-        return dist_files().difference(existing_files)
-
-    def rollback_setup_version_change_and_delete_new_files():
-        for created_file in created_files():
-            Path(created_file).unlink()
-        rollback_setup_version_change()
-
-    ensure_process(
-        'python3', SETUP_NAME, 'sdist', 'bdist_wheel',
-        rollback=rollback_setup_version_change_and_delete_new_files,
-    )
-    ensure_process(
-        'python3', '-m', 'twine', 'check', DIST_FILES_PATTERN,
-        rollback=rollback_setup_version_change_and_delete_new_files,
-    )
-    delete_backup_file(SETUP_PATH)
-    for new_file in created_files():
-        ensure_process('git', 'add', new_file)
 
 
 def version_files(major: int, minor: int, patch: int):
@@ -268,9 +243,43 @@ def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
     repository = ['--repository', 'testpypi'] if args.test_pypi else []
     username = ['--username', args.username] if args.username else []
     password = ['--password', args.password] if args.password else []
+    ensure_process('python3', '-m', 'twine', 'upload', *repository, *username, *password, DIST_FILES_PATTERN,)
+
+
+def create_pypi_files_if_setup_exists():
+    if not SETUP_PATH.is_file():
+        return
+    existing_files = dist_files()
+    ensure_process('python3', SETUP_NAME, 'sdist', 'bdist_wheel',)
+    for new_file in dist_files().difference(existing_files):
+        ensure_process('git', 'add', new_file)
+
+
+def ensure_pypi_check_if_setup_exists():
+    if not SETUP_PATH.is_file():
+        return
     ensure_process(
-        'python3', '-m', 'twine', 'upload', *repository, *username, *password, DIST_FILES_PATTERN,
+        'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine',
+        rollback=rollback_setup_version_change,
     )
+    existing_files = dist_files()
+
+    def created_files():
+        return dist_files().difference(existing_files)
+
+    def delete_created_files():
+        for created_file in created_files():
+            Path(created_file).unlink()
+
+    ensure_process(
+        'python3', SETUP_NAME, 'sdist', 'bdist_wheel',
+        rollback=delete_created_files,
+    )
+    ensure_process(
+        'python3', '-m', 'twine', 'check', DIST_FILES_PATTERN,
+        rollback=delete_created_files,
+    )
+    delete_created_files()
 
 
 def parse_args():
@@ -278,7 +287,8 @@ def parse_args():
         '-V', '--version',
         help="show program's version number and exit",
         action='version',
-        version='%(prog)s ' + __version__)
+        version='%(prog)s ' + __version__
+    )
     PARSER.add_argument('-f', '--force_tag', help='force tag version even if out of sequence', action='store_true')
     PARSER.add_argument('tag_version', help='tag and file version number in format: `<Major>.<Minor>.<Patch>`')
     PARSER.add_argument('tag_description', help='description for tag and commit')
@@ -316,8 +326,10 @@ def main():
     forced_version, version, description = args.force_tag, args.tag_version, args.tag_description
     major, minor, patch = parse_version(version)
     ensure_tag_version_if_not_forced(major, minor, patch, forced_version)
+    ensure_pypi_check_if_setup_exists()
     ensure_setup_version_and_version_setup_if_setup_exists(major, minor, patch, args)
     version_files(major, minor, patch)
+    create_pypi_files_if_setup_exists()
     commit_files(description)
     tag_repository(major, minor, patch, description)
     push_repository_if_remote_exists(major, minor, patch)
