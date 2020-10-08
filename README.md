@@ -21,14 +21,15 @@ git tagging to file versioning and all in between and either side. In particular
 
   6. Uploads to ``PyPI`` or ``Test PyPi`` with ``-t`` option (if ``setup.py`` exists).
 
-The whole program is in the single file, ``tag2var.py``, (without any dependencies outside 
-of Python3.6+) and therefore this file alone can be copied to install the utility. 
-Alternatively::
-    
-    pip3 install tag2ver
-
 ``tag2ver`` is careful to check everything before making changes, i.e. it is heavily
 biased to finding and reporting an error before attempting any actions.
+
+The whole program is in the single file, ``tag2var.py``, (without any dependencies outside 
+of Python3.6+) and therefore this file alone can be copied to somewhere on the execution 
+path and made executable to install the utility. 
+Alternatively::
+    
+    pip3 install --upgrade tag2ver
 
 
 Help Text
@@ -42,7 +43,8 @@ Usage from *folder with git repository to tag and source files to version*:
   *  ``<tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``, 
      if ``tag2ver.py`` is executable but not on execution path.
 
-  *  ``python3 <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``.
+  *  ``python3 <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``,
+     which is the default when using pip to install.
 
 If ``pip3 install tag2ver`` used, you can find the ``<tag2ver dir>`` directory (location) with 
 ``pip3 show tag2ver``.
@@ -66,7 +68,7 @@ Options (order of options not important):
   * ``-p <Password>`` or ``--password <Password>``, for ``PyPi``/``Test PyPi`` (if ``setup.py`` exists).
     (Passed onto twine (<https://twine.readthedocs.io/en/latest/>).)
 
-Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
+Tag and file version in form ```<Major>.<Minor>.<Patch>``` (must be the 1st non-option):
 
   * Must be a semantic version (<https://semver.org>) with format ``<Major>.<Minor>.<Patch>``,
     where ``Major``, ``Minor``, and ``Patch`` are positive integers or zero and
@@ -96,7 +98,7 @@ Note 1:
     problem since much development happens before ready for PyPI and therefore version 
     already ``>0.0.0``.
 
-Description usually in quotes (must be the 2nd non-option):
+Tag and commit description; usually in quotes (must be the 2nd non-option):
 
   * Description of the version: a single, short, ideally < 50 characters, sentence with 
     an imperative mood (in double quotes to allow spaces).
@@ -110,8 +112,8 @@ Actions ``tag2ver`` takes in order:
 
   * Checks if PyPI deployed (``setup.py`` must exist) (see note 2)
 
-  * Updates the ``__version__`` attribute of all the ``py``, except ``setup.py`` (see above), 
-    and ``pyi`` file's in the 
+  * Updates the ``__version__`` attribute of all the ``py``, except ``setup.py`` 
+    (see above and note 2), and ``pyi`` file's in the 
     current directory and sub-directories with given version 
     (``__version__`` attributes must already exist in all files).
 
@@ -122,8 +124,8 @@ Actions ``tag2ver`` takes in order:
 
   * If ``remote`` repository exists, pushes ``origin`` to ``master``.
 
-  * If ``setup.py`` exists, uploads to ``PyPI`` (or ``Test PyPi`` with ``-t`` option) with given 
-    version. 
+  * If ``setup.py`` exists, uploads to ``PyPI`` (or ``Test PyPi`` with ``-t`` option) 
+    with given version. 
     Username, ``-u`` or ``--username``, and password, ``-p`` or ``--password``, 
     may optionally be specified.
     (Upload uses twine (<https://twine.readthedocs.io/en/latest/>), 

@@ -9,8 +9,8 @@ def read_text(file_name: str):
 
 
 setuptools.setup(
-    name='tag2ver-hlovatt',
-    version='0.6.23',
+    name='tag2ver',
+    version='1.0.0',
     url=tag2ver.__repository__,
     license=read_text('LICENSE'),
     author=tag2ver.__author__,
