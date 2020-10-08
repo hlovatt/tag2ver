@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.21"
+__version__ = "0.6.22"
 
 __all__ = ['main']
 
@@ -29,6 +29,7 @@ SETUP_PATH = Path(SETUP_NAME)
 SETUP_VERSION_RE = re.compile(r'(?P<attr>version\s*=\s*)(?P<quote>["|' + r"'])" + VERSION_RE_STR + r'(?P=quote)')
 HELP_TEXT = 'Easy release management: file versioning, git commit, git tagging, and  optionally git remote and PyPI.'
 DIST_PATH = Path('dist')
+DIST_PATTERN = str(DIST_PATH / '*')
 PARSER = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
 
 
@@ -221,39 +222,42 @@ def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
     repository = ['--repository', 'testpypi'] if args.test_pypi else []
     username = ['--username', args.username] if args.username else []
     password = ['--password', args.password] if args.password else []
-    ensure_process('python3', '-m', 'twine', 'upload', *repository, *username, *password, str(DIST_PATH / '*'),)
+    ensure_process('python3', '-m', 'twine', 'upload', *repository, *username, *password, DIST_PATTERN,)
 
 
-def create_pypi_files_if_setup_exists():
+def create_new_pypi_files_and_delete_old_files_if_setup_exists():
     if not SETUP_PATH.is_file():
         return
-    existing_files = dist_files()
+    ensure_process('git', 'rm', DIST_PATTERN)
     ensure_process('python3', SETUP_NAME, 'sdist', 'bdist_wheel',)
-    for new_file in dist_files().difference(existing_files):
-        ensure_process('git', 'add', str(new_file))
+    ensure_process('git', 'add', DIST_PATTERN)
+
+
+def save_existing_pypi_files():
+    DIST_PATH.rename(make_bak_path(DIST_PATH))
+
+
+def delete_temp_pypi_files_and_restore_existing_files():
+    for created_file in DIST_PATH.iterdir():
+        created_file.unlink()
+    DIST_PATH.rmdir()
+    make_bak_path(DIST_PATH).rename(DIST_PATH)
 
 
 def ensure_pypi_check_if_setup_exists():
     if not SETUP_PATH.is_file():
         return
     ensure_process('python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine',)
-    bak_dist_path = DIST_PATH.rename(make_bak_path(DIST_PATH))
-
-    def delete_created_files():
-        for created_file in DIST_PATH.iterdir():
-            created_file.unlink()
-        DIST_PATH.rmdir()
-        bak_dist_path.rename(DIST_PATH)
-
+    save_existing_pypi_files()
     ensure_process(
         'python3', SETUP_NAME, 'sdist', 'bdist_wheel',
-        rollback=delete_created_files,
+        rollback=delete_temp_pypi_files_and_restore_existing_files,
     )
     ensure_process(
-        'python3', '-m', 'twine', 'check', str(DIST_PATH / '*'),
-        rollback=delete_created_files,
+        'python3', '-m', 'twine', 'check', DIST_PATTERN,
+        rollback=delete_temp_pypi_files_and_restore_existing_files,
     )
-    delete_created_files()
+    delete_temp_pypi_files_and_restore_existing_files()
 
 
 def parse_args():
@@ -303,7 +307,7 @@ def main():
     ensure_pypi_check_if_setup_exists()
     ensure_setup_version_and_version_setup_if_setup_exists(major, minor, patch, args)
     version_files(major, minor, patch)
-    create_pypi_files_if_setup_exists()
+    create_new_pypi_files_and_delete_old_files_if_setup_exists()
     commit_files(description)
     tag_repository(major, minor, patch, description)
     push_repository_if_remote_exists(major, minor, patch)
