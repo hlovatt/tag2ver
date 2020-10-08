@@ -7,12 +7,11 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "0.6.20"
+__version__ = "0.6.21"
 
 __all__ = ['main']
 
 import argparse
-import glob
 import os
 import re
 import subprocess
@@ -29,7 +28,7 @@ SETUP_NAME = 'setup.py'
 SETUP_PATH = Path(SETUP_NAME)
 SETUP_VERSION_RE = re.compile(r'(?P<attr>version\s*=\s*)(?P<quote>["|' + r"'])" + VERSION_RE_STR + r'(?P=quote)')
 HELP_TEXT = 'Easy release management: file versioning, git commit, git tagging, and  optionally git remote and PyPI.'
-DIST_FILES_PATTERN = os.path.join('dist', '*')
+DIST_PATH = Path('dist')
 PARSER = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
 
 
@@ -106,29 +105,15 @@ def ensure_tag_version_if_not_forced(
     )
 
 
-def make_back_path(path: Path):
-    bak_path = path.with_suffix('.bak')
-    return bak_path
+def make_bak_path(path: Path):
+    return path.with_suffix('.bak')
 
 
-def delete_backup_file(path: Path):
-    make_back_path(path).unlink()
-
-
-def replace_file(path: Path, new_text: List[str], delete_backup: bool = True):
-    bak_path = make_back_path(path)
+def replace_file(path: Path, new_text: List[str]):
+    bak_path = make_bak_path(path)
     path.rename(bak_path)
     path.write_text(''.join(new_text))
-    if delete_backup:
-        delete_backup_file(path)
-
-
-def rollback_replace_file(path: Path):
-    make_back_path(path).rename(path)
-
-
-def rollback_setup_version_change():
-    rollback_replace_file(SETUP_PATH)
+    make_bak_path(path).unlink()
 
 
 def version_as_str(major: int, minor: int, patch: int):
@@ -136,7 +121,7 @@ def version_as_str(major: int, minor: int, patch: int):
 
 
 def dist_files():
-    return set(glob.iglob(DIST_FILES_PATTERN))
+    return set(DIST_PATH.iterdir())
 
 
 def ensure_setup_version_and_version_setup_if_setup_exists(
@@ -145,13 +130,6 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
         patch: int,
         args: argparse.Namespace,
 ):
-    """
-    Checks if `setup` exists and if it does:
-      * Checks that given version is an increment of existing version.
-      * Updates `version` keyword argument in `setup`.
-      * Generates files for `PyPi`/`Test PyPi`.
-      * If anything fails, exits `tag2ver` and undoes any changes made.
-    """
     if not SETUP_PATH.is_file():
         ensure(
             not args.test_pipy,
@@ -197,7 +175,7 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
         version_found,
         f'No "version" line found in `{SETUP_NAME}` (RE is `{SETUP_VERSION_RE}`).',
     )
-    replace_file(SETUP_PATH, new_setup, delete_backup=False)
+    replace_file(SETUP_PATH, new_setup)
 
 
 def version_files(major: int, minor: int, patch: int):
@@ -243,7 +221,7 @@ def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
     repository = ['--repository', 'testpypi'] if args.test_pypi else []
     username = ['--username', args.username] if args.username else []
     password = ['--password', args.password] if args.password else []
-    ensure_process('python3', '-m', 'twine', 'upload', *repository, *username, *password, DIST_FILES_PATTERN,)
+    ensure_process('python3', '-m', 'twine', 'upload', *repository, *username, *password, str(DIST_PATH / '*'),)
 
 
 def create_pypi_files_if_setup_exists():
@@ -252,31 +230,27 @@ def create_pypi_files_if_setup_exists():
     existing_files = dist_files()
     ensure_process('python3', SETUP_NAME, 'sdist', 'bdist_wheel',)
     for new_file in dist_files().difference(existing_files):
-        ensure_process('git', 'add', new_file)
+        ensure_process('git', 'add', str(new_file))
 
 
 def ensure_pypi_check_if_setup_exists():
     if not SETUP_PATH.is_file():
         return
-    ensure_process(
-        'python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine',
-        rollback=rollback_setup_version_change,
-    )
-    existing_files = dist_files()
-
-    def created_files():
-        return dist_files().difference(existing_files)
+    ensure_process('python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine',)
+    bak_dist_path = DIST_PATH.rename(make_bak_path(DIST_PATH))
 
     def delete_created_files():
-        for created_file in created_files():
-            Path(created_file).unlink()
+        for created_file in DIST_PATH.iterdir():
+            created_file.unlink()
+        DIST_PATH.rmdir()
+        bak_dist_path.rename(DIST_PATH)
 
     ensure_process(
         'python3', SETUP_NAME, 'sdist', 'bdist_wheel',
         rollback=delete_created_files,
     )
     ensure_process(
-        'python3', '-m', 'twine', 'check', DIST_FILES_PATTERN,
+        'python3', '-m', 'twine', 'check', str(DIST_PATH / '*'),
         rollback=delete_created_files,
     )
     delete_created_files()

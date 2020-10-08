@@ -44,11 +44,15 @@ Usage from *folder with git repository to tag and source files to version*:
 
   *  ``python3 <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``.
 
+If ``pip3 install tag2ver`` used, you can find the ``<tag2ver dir>`` directory (location) with 
+``pip3 show tag2ver``.
+
 Options (order of options not important):
 
   * ``-h`` or ``--help``, print short help message (rest of command line ignored).
 
-  * ``--version``, print version number of ``tag2ver`` (rest of command line ignored).
+  * ``-V`` or ``--version``, print version number of ``tag2ver`` 
+    (rest of command line ignored).
 
   * ``-f`` or ``--force``, force the given git (not PyPI) version even if it is not a single 
     increment.
@@ -65,11 +69,12 @@ Options (order of options not important):
 Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
 
   * Must be a semantic version (<https://semver.org>) with format ``<Major>.<Minor>.<Patch>``,
-    where ``Major``, ``Minor``, and ``Patch`` are positive integers or zero.
+    where ``Major``, ``Minor``, and ``Patch`` are positive integers or zero and
+    all must be present.
 
   * Must be a single increment from previous git tag version, unless ``-f`` option given.
 
-  * If PyPi used must be at least one increment from PyPI version 
+  * If PyPi used must be at *least* one increment from PyPI version 
     (``-f`` not considered for PyPI version comparison).
 
   * Use: ``<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`` 
@@ -134,16 +139,22 @@ Note 2:
 
 EG:
 
-  * ``<tag2ver dir>.tag2ver.py -h``, prints help.
+  * ``python3 <tag2ver dir>.tag2ver.py -h``, prints help.
 
-  * ``<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."``, 
-    for 1st release (note ``-f`` and note ``0.0.0`` cannot be pushed to PyPI).
+  * ``python3 <tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."``, 
+    for 1st release (note ``-f`` and note ``0.0.0`` cannot be pushed to PyPI
+    and therefore ``setup.py`` cannot exist).
 
-  * ``<tag2ver dir>.tag2ver.py 0.0.1 "Fix bugs, tag, and version."``, for 2nd release.
+  * ``python3 <tag2ver dir>.tag2ver.py 0.0.1 "Fix bugs, tag, and version."``, 
+    for 2nd release.
 
-  * ``<tag2ver dir>.tag2ver.py 0.1.0 "Add features, tag, and version."``, for 3rd release.
+  * ``python3 <tag2ver dir>.tag2ver.py 0.1.0 "Add features, tag, and version."``, 
+    for 3rd release.
 
-  * ``<tag2ver dir>.tag2ver.py 1.0.0 "Make incompatible changes, tag, and version."``, 
+  * ``python3 <tag2ver dir>.tag2ver.py 1.0.0 "Make incompatible changes, tag, and version."``, 
     for 4th release.
+
+  * ``python3 <tag2ver dir>.tag2ver.py 2.0.0 "Push to PyPi." -u <Username>``, 
+    for push to PyPi using twine (<https://twine.readthedocs.io/en/latest/>).
 
   * Etc. for subsequent releases.
