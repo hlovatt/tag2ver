@@ -10,7 +10,7 @@ def read_text(file_name: str):
 
 setuptools.setup(
     name='tag2ver-hlovatt',
-    version='0.6.22',
+    version='0.6.23',
     url=tag2ver.__repository__,
     license=read_text('LICENSE'),
     author=tag2ver.__author__,
