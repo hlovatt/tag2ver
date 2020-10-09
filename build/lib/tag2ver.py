@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.0.0"
+__version__ = "1.1.0  # Version set by https://github.com/hlovatt/tag2ver"
 
 __all__ = ['main']
 
@@ -131,10 +131,7 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
         args: argparse.Namespace,
 ):
     if not SETUP_PATH.is_file():
-        ensure(
-            not args.test_pipy,
-            '`Test PyPi specified but no `' + SETUP_NAME + '` file!',
-        )
+        ensure(not args.test_pypi, '`Test PyPi specified but no `' + SETUP_NAME + '` file!',)
         return
     sub_str = r'\g<attr>\g<quote>' + version_as_str(major, minor, patch) + r'\g<quote>'
     version_found = False
@@ -195,7 +192,9 @@ def version_files(major: int, minor: int, patch: int):
         with path.open() as file:
             for line in file:
                 if line.startswith(VERSION_ATTR):
-                    new_file.append(f'{VERSION_ATTR} = "{version_as_str(major, minor, patch)}"\n')
+                    new_file.append(
+                        f'{VERSION_ATTR} = "{version_as_str(major, minor, patch)}  # Version set by {__repository__}"\n'
+                    )
                 else:
                     new_file.append(line)
         replace_file(path, new_file)

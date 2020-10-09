@@ -90,8 +90,11 @@ Note 1:
 
   * ``py`` and ``pyi`` files still need version attr (though it can be an empty string), 
     e.g. ``__version__ = ''``.
+    The version attr must begin the line and must be the only thing on the line
+    (the whole line is replaced!).
 
-  * Similarly ``setup``, e.g. ``version='0.0.0'`` (must have a valid version though).
+  * Similarly ``setup``, e.g. ``version='0.0.0'`` 
+    (must have a valid version though and doesn't have to be on a line of its own).
 
   * Since ``setup`` must contain a valid version the smallest version that can be in PyPi
     is ``0.0.1`` (since version in ``setup`` must be increased). In practice this isn't a 
