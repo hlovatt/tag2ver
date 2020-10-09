@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.1.7"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.1.8"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ['main']
 
@@ -112,7 +112,8 @@ def make_bak_path(path: Path):
 
 
 def replace_file(path: Path, new_text: List[str]):
-    bak_path = path.rename(make_bak_path(path))
+    bak_path = make_bak_path(path)
+    bak_path = path.rename(bak_path)
     path.write_text(''.join(new_text))
     bak_path.unlink()
 
