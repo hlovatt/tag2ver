@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.1.5"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.1.6"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ['main']
 
@@ -179,9 +179,9 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
 def not_excluded_dir(path: Path):
     parents = list(path.parents)
     print(parents)
-    if not parents:
+    if len(parents) < 2:
         return True
-    root_parent = parents[-1]
+    root_parent = parents[-2]
     return not (root_parent in EXCLUDE_PATHS) and not (root_parent.suffix == '.egg_info')
 
 
