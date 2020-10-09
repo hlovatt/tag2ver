@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.1.0  # Version set by https://github.com/hlovatt/tag2ver"
+__version__ = "1.1.1"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ['main']
 
@@ -177,6 +177,7 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
 
 def version_files(major: int, minor: int, patch: int):
     paths = list(Path().rglob("*.py"))
+    print(paths)
     paths.extend(Path().rglob("*.pyi"))
     for path in paths:
         if path == SETUP_PATH:  # Setup is a special case.
@@ -193,7 +194,7 @@ def version_files(major: int, minor: int, patch: int):
             for line in file:
                 if line.startswith(VERSION_ATTR):
                     new_file.append(
-                        f'{VERSION_ATTR} = "{version_as_str(major, minor, patch)}  # Version set by {__repository__}"\n'
+                        f'{VERSION_ATTR} = "{version_as_str(major, minor, patch)}"  # Version set by {__repository__}\n'
                     )
                 else:
                     new_file.append(line)
