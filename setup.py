@@ -10,7 +10,7 @@ def read_text(file_name: str):
 
 setuptools.setup(
     name='tag2ver',
-    version='1.1.9',
+    version='1.1.10',
     url=tag2ver.__repository__,
     license=read_text('LICENSE'),
     author=tag2ver.__author__,

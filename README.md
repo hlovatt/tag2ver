@@ -117,7 +117,9 @@ Actions ``tag2ver`` takes in order:
 
   * Updates the ``__version__`` attribute of all the ``py``, except ``setup.py`` 
     (see above and note 2), and ``pyi`` file's in the 
-    current directory and sub-directories with given version 
+    current directory and sub-directories 
+    (excluding ``build``, ``dist``, ``media``, ``venv``, and ``*.egg-info``)
+    with given version 
     (``__version__`` attributes must already exist in all files).
 
   * Commits all modified files, including ``py`` and ``pyi`` files ``tag2ver`` has modified, 
