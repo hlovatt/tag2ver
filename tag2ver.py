@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.1.6"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.1.7"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ['main']
 
@@ -178,7 +178,6 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
 
 def not_excluded_dir(path: Path):
     parents = list(path.parents)
-    print(parents)
     if len(parents) < 2:
         return True
     root_parent = parents[-2]
@@ -192,7 +191,6 @@ def filter_build_etc_dirs(paths: Iterable[Path]):
 def version_files(major: int, minor: int, patch: int):
     paths = list(filter_build_etc_dirs(Path().rglob("*.py")))
     paths.extend(filter_build_etc_dirs(Path().rglob("*.pyi")))
-    print(paths)
     for path in paths:
         if path == SETUP_PATH:  # Setup is a special case.
             continue
