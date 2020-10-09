@@ -131,10 +131,7 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
         args: argparse.Namespace,
 ):
     if not SETUP_PATH.is_file():
-        ensure(
-            not args.test_pipy,
-            '`Test PyPi specified but no `' + SETUP_NAME + '` file!',
-        )
+        ensure(not args.test_pypi, '`Test PyPi specified but no `' + SETUP_NAME + '` file!',)
         return
     sub_str = r'\g<attr>\g<quote>' + version_as_str(major, minor, patch) + r'\g<quote>'
     version_found = False
