@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.1.1"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.1.5"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ['main']
 
@@ -19,7 +19,7 @@ import sys
 
 from pathlib import Path
 
-from typing import List, Callable
+from typing import List, Callable, Iterable
 
 VERSION_RE_STR = r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)'
 VERSION_RE = re.compile(r'^' + VERSION_RE_STR + r'$')
@@ -31,6 +31,7 @@ HELP_TEXT = 'Easy release management: file versioning, git commit, git tagging, 
 DIST_PATH = Path('dist')
 DIST_PATTERN = str(DIST_PATH / '*')
 PARSER = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
+EXCLUDE_PATHS = [Path('build'), Path('dist'), Path('media'), Path('venv')]
 
 
 def ensure(condition: bool, msg: str, *, rollback: Callable[[], None] = lambda: None):
@@ -175,10 +176,23 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
     replace_file(SETUP_PATH, new_setup)
 
 
+def not_excluded_dir(path: Path):
+    parents = list(path.parents)
+    print(parents)
+    if not parents:
+        return True
+    root_parent = parents[-1]
+    return not (root_parent in EXCLUDE_PATHS) and not (root_parent.suffix == '.egg_info')
+
+
+def filter_build_etc_dirs(paths: Iterable[Path]):
+    return (path for path in paths if not_excluded_dir(path))
+
+
 def version_files(major: int, minor: int, patch: int):
-    paths = list(Path().rglob("*.py"))
+    paths = list(filter_build_etc_dirs(Path().rglob("*.py")))
+    paths.extend(filter_build_etc_dirs(Path().rglob("*.pyi")))
     print(paths)
-    paths.extend(Path().rglob("*.pyi"))
     for path in paths:
         if path == SETUP_PATH:  # Setup is a special case.
             continue
