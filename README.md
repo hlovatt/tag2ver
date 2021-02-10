@@ -5,11 +5,11 @@ Easy release management: file versioning, git commit, git tagging, and  optional
 git remote and PyPI. 
 
 The name ``tag2var`` is meant to convey that the utility does everything from 
-git tagging to file versioning and all in between and either side. In particular
+git-tagging to file-versioning and all in between and either side. In particular
 ``tag2var``:
 
   1. Updates ``py`` and ``pyi`` file's ``__version__`` attribute with given incremented 
-     semantic version (<https://semver.org>).
+     semantic-version (<https://semver.org>).
 
   2. Updates ``version`` attribute of ``setup.py`` as above (if ``setup`` exists).
 
@@ -21,9 +21,8 @@ git tagging to file versioning and all in between and either side. In particular
 
   6. Uploads to ``PyPI`` or ``Test PyPi`` with ``-t`` option (if ``setup.py`` exists).
 
-
 The whole program is in the single file, ``tag2var.py``, (without any dependencies outside 
-of Python3.6+) and therefore this file alone can be copied to install the utility. 
+Python3.6+) and therefore this file alone can be copied to install the utility. 
 Alternatively::
 
     pip3 install tag2ver
@@ -31,16 +30,15 @@ Alternatively::
 ``tag2ver`` is careful to check everything before making changes, i.e. it is heavily
 biased to finding and reporting an error before attempting any actions.
 
-
 Help Text
 ---------
 
 Usage from *folder with git repository to tag and source files to version*:
 
-  *  ``tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``, 
+  *  ``tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`` 
      if ``tag2ver.py`` is executable and on execution path.
 
-  *  ``<tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``, 
+  *  ``<tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`` 
      if ``tag2ver.py`` is executable but not on execution path.
 
   *  ``python3 <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``.
@@ -49,7 +47,7 @@ Options (order of options not important):
 
   * ``-h`` or ``--help``, print short help message (rest of command line ignored).
 
-  * ``--version``, print version number of ``tag2ver`` (rest of command line ignored).
+  * ``--version`` print version number of ``tag2ver`` (rest of command line ignored).
 
   * ``-f`` or ``--force``, force the given git (not PyPI) version even if it is not a single 
     increment.
@@ -74,7 +72,7 @@ Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
     (``-f`` not considered for PyPI version comparison).
 
   * Use: ``<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`` 
-    (or similar), for 1st tagging in repository (note 1)
+    (or similar), for 1st tagging in the repository (note 1)
 
   * Leading zeros are allowed but ignored, e.g. ``00.00.00`` is the same as ``0.0.0``.
 
@@ -82,7 +80,7 @@ Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
 
 Note 1:
 
-  * ``py`` and ``pyi`` files still need version attr (though it can be an empty string), 
+  * Both ``py`` and ``pyi`` files still need version attr (though it can be an empty string), 
     e.g. ``__version__ = ''``.
 
   * Similarly ``setup``, e.g. ``version='0.0.0'`` (must have a valid version though).
@@ -135,16 +133,16 @@ Note 2:
 
 EG:
 
-  * ``<tag2ver dir>.tag2ver.py -h``, prints help.
+  * ``<tag2ver dir>.tag2ver.py -h`` prints help.
 
-  * ``<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."``, 
+  * ``<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`` 
     for 1st release (note ``-f`` and note ``0.0.0`` cannot be pushed to PyPI).
 
-  * ``<tag2ver dir>.tag2ver.py 0.0.1 "Fix bugs, tag, and version."``, for 2nd release.
+  * ``<tag2ver dir>.tag2ver.py 0.0.1 "Fix bugs, tag, and version."`` for 2nd release.
 
-  * ``<tag2ver dir>.tag2ver.py 0.1.0 "Add features, tag, and version."``, for 3rd release.
+  * ``<tag2ver dir>.tag2ver.py 0.1.0 "Add features, tag, and version."`` for 3rd release.
 
-  * ``<tag2ver dir>.tag2ver.py 1.0.0 "Make incompatible changes, tag, and version."``, 
+  * ``<tag2ver dir>.tag2ver.py 1.0.0 "Make incompatible changes, tag, and version."`` 
     for 4th release.
 
   * Etc. for subsequent releases.
