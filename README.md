@@ -36,15 +36,8 @@ Help Text
 
 Usage from *folder with git repository to tag and source files to version*:
 
-  *  ``tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`` 
-     if ``tag2ver.py`` is executable and on execution path.
-
-  *  ``<tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`` 
-     if ``tag2ver.py`` is executable but not on execution path 
-     (``pip show tag2ver`` will show where ``tag2ver`` is installed).
-
-  *  ``python3 <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``
-     (``pip show tag2ver`` will show where ``tag2ver`` is installed).
+  *  ``python <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``
+     (``pip show tag2ver`` will show where ``tag2ver`` is installed, i.e. ``<tag2ver dir>``).
 
 Options (order of options not important):
 
@@ -56,13 +49,13 @@ Options (order of options not important):
     increment.
 
   * ``-t`` or ``--test_pypi``, use ``Test PyPI`` instead of ``PyPI`` (if ``setup.py`` exists).
-    (Passes ``--repository testpypi`` onto twine (<https://twine.readthedocs.io/en/latest/>).)
+    Passes ``--repository testpypi`` onto twine (<https://twine.readthedocs.io/en/latest/>).
 
   * ``-u <Username>`` or ``--username <Username>``, for ``PyPI``/``Test PyPI`` (if ``setup.py`` exists).
-    (Passed onto twine (<https://twine.readthedocs.io/en/latest/>).)
+    Passed onto twine (<https://twine.readthedocs.io/en/latest/>). *Commonly* required with PyPI.
 
   * ``-p <Password>`` or ``--password <Password>``, for ``PyPI``/``Test PyPI`` (if ``setup.py`` exists).
-    (Passed onto twine (<https://twine.readthedocs.io/en/latest/>).)
+    Passed onto twine (<https://twine.readthedocs.io/en/latest/>).
 
 Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
 
@@ -134,18 +127,19 @@ Note 2:
   * Updates ``setup.py``'s ``version`` attribute with given version 
     (``version`` kwarg must already exist).
 
-EG:
+EG (in below ``pip show tag2ver`` gives ``<tag2ver dir>`` as location):
 
-  * ``<tag2ver dir>.tag2ver.py -h`` prints help.
+  * ``python <tag2ver dir>.tag2ver.py -h`` prints help.
 
-  * ``<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`` 
+  * ``python <tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`` 
     for 1st release (note ``-f`` and note ``0.0.0`` cannot be pushed to PyPI).
 
-  * ``<tag2ver dir>.tag2ver.py 0.0.1 "Fix bugs, tag, and version."`` for 2nd release.
+  * ``python <tag2ver dir>.tag2ver.py 0.0.1 "Fix bugs, tag, and version."``.
 
-  * ``<tag2ver dir>.tag2ver.py 0.1.0 "Add features, tag, and version."`` for 3rd release.
+  * ``python <tag2ver dir>.tag2ver.py 0.1.0 "Add features, tag, and version."``.
 
-  * ``<tag2ver dir>.tag2ver.py 1.0.0 "Make incompatible changes, tag, and version."`` 
-    for 4th release.
+  * ``python <tag2ver dir>.tag2ver.py 1.0.0 "Make incompatible changes, tag, and version."``.
 
-  * Etc. for subsequent releases.
+  * ``python <tag2ver dir>.tag2ver.py -u <PyPI user name> 1.0.1 "Push to PyPI."``. 
+    Might need password as well, depending on twine
+    (https://twine.readthedocs.io/en/latest/) setup, and requires ``setup.py``.
