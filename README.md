@@ -19,16 +19,17 @@ git-tagging to file-versioning and all in between and either side. In particular
 
   5. Pushes to remote git (if remote exists).
 
-  6. Uploads to ``PyPI`` or ``Test PyPi`` with ``-t`` option (if ``setup.py`` exists).
-
-The whole program is in the single file, ``tag2var.py``, (without any dependencies outside 
-Python3.6+) and therefore this file alone can be copied to install the utility. 
-Alternatively::
-
-    pip3 install tag2ver
+  6. Uploads to ``PyPI`` or ``Test PyPI`` with ``-t`` option (if ``setup.py`` exists).
 
 ``tag2ver`` is careful to check everything before making changes, i.e. it is heavily
 biased to finding and reporting an error before attempting any actions.
+
+The whole program is in the single file, ``tag2var.py``, (without any dependencies outside 
+Python3.6+) and therefore this file alone can be copied to install the utility. 
+
+Alternatively::
+
+    pip install --upgrade tag2ver
 
 Help Text
 ---------
@@ -39,9 +40,11 @@ Usage from *folder with git repository to tag and source files to version*:
      if ``tag2ver.py`` is executable and on execution path.
 
   *  ``<tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]`` 
-     if ``tag2ver.py`` is executable but not on execution path.
+     if ``tag2ver.py`` is executable but not on execution path 
+     (``pip show tag2ver`` will show where ``tag2ver`` is installed).
 
-  *  ``python3 <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``.
+  *  ``python3 <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``
+     (``pip show tag2ver`` will show where ``tag2ver`` is installed).
 
 Options (order of options not important):
 
@@ -52,13 +55,13 @@ Options (order of options not important):
   * ``-f`` or ``--force``, force the given git (not PyPI) version even if it is not a single 
     increment.
 
-  * ``-t`` or ``--test_pypi``, use ``Test PyPi`` instead of ``PyPi`` (if ``setup.py`` exists).
+  * ``-t`` or ``--test_pypi``, use ``Test PyPI`` instead of ``PyPI`` (if ``setup.py`` exists).
     (Passes ``--repository testpypi`` onto twine (<https://twine.readthedocs.io/en/latest/>).)
 
-  * ``-u <Username>`` or ``--username <Username>``, for ``PyPi``/``Test PyPi`` (if ``setup.py`` exists).
+  * ``-u <Username>`` or ``--username <Username>``, for ``PyPI``/``Test PyPI`` (if ``setup.py`` exists).
     (Passed onto twine (<https://twine.readthedocs.io/en/latest/>).)
 
-  * ``-p <Password>`` or ``--password <Password>``, for ``PyPi``/``Test PyPi`` (if ``setup.py`` exists).
+  * ``-p <Password>`` or ``--password <Password>``, for ``PyPI``/``Test PyPI`` (if ``setup.py`` exists).
     (Passed onto twine (<https://twine.readthedocs.io/en/latest/>).)
 
 Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
@@ -68,7 +71,7 @@ Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
 
   * Must be a single increment from previous git tag version, unless ``-f`` option given.
 
-  * If PyPi used must be at least one increment from PyPI version 
+  * If PyPI used must be at least one increment from PyPI version 
     (``-f`` not considered for PyPI version comparison).
 
   * Use: ``<tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`` 
@@ -85,7 +88,7 @@ Note 1:
 
   * Similarly ``setup``, e.g. ``version='0.0.0'`` (must have a valid version though).
 
-  * Since ``setup`` must contain a valid version the smallest version that can be in PyPi
+  * Since ``setup`` must contain a valid version the smallest version that can be in PyPI
     is ``0.0.1`` (since version in ``setup`` must be increased). In practice this isn't a 
     problem since much development happens before ready for PyPI and therefore version 
     already ``>0.0.0``.
@@ -116,7 +119,7 @@ Actions ``tag2ver`` takes in order:
 
   * If ``remote`` repository exists, pushes ``origin`` to ``master``.
 
-  * If ``setup.py`` exists, uploads to ``PyPI`` (or ``Test PyPi`` with ``-t`` option) with given 
+  * If ``setup.py`` exists, uploads to ``PyPI`` (or ``Test PyPI`` with ``-t`` option) with given 
     version. 
     Username, ``-u`` or ``--username``, and password, ``-p`` or ``--password``, 
     may optionally be specified.
@@ -126,7 +129,7 @@ Actions ``tag2ver`` takes in order:
 Note 2:
 
   * Checks version number is at least one increment from last PyPI deployment 
-    (regardless of ``-f`` option - PyPi versioning cannot be overridden).
+    (regardless of ``-f`` option - PyPI versioning cannot be overridden).
 
   * Updates ``setup.py``'s ``version`` attribute with given version 
     (``version`` kwarg must already exist).

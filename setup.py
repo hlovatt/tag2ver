@@ -15,7 +15,7 @@ setuptools.setup(
     license=read_text('LICENSE'),
     author=tag2ver.__author__,
     author_email='howard.lovatt@gmail.com',
-    description='Easy release management: file versioning, git commit, git tagging, git remote, and PyPI.',
+    description=tag2ver.HELP_TEXT,
     # read_text('README.md') doesn't work because PyPi can't render README.md - PyPi bug.
     long_description=f'See <{tag2ver.__repository__}> for detailed description.',  # read_text('README.md'),
     long_description_content_type='text/markdown',
