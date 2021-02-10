@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt"
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.1.10"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.1.11"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ['main']
 
@@ -31,7 +31,7 @@ HELP_TEXT = 'Easy release management: file versioning, git commit, git tagging, 
 DIST_PATH = Path('dist')
 DIST_PATTERN = str(DIST_PATH / '*')
 PARSER = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
-EXCLUDE_PATHS = [Path('build'), Path('dist'), Path('media'), Path('venv')]
+EXCLUDE_PATHS = [Path('build'), DIST_PATH, Path('media'), Path('venv')]
 
 
 def ensure(condition: bool, msg: str, *, rollback: Callable[[], None] = lambda: None):
@@ -133,7 +133,7 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
         args: argparse.Namespace,
 ):
     if not SETUP_PATH.is_file():
-        ensure(not args.test_pypi, '`Test PyPi specified but no `' + SETUP_NAME + '` file!',)
+        ensure(not args.test_pypi, '`Test PyPI specified but no `' + SETUP_NAME + '` file!',)
         return
     sub_str = r'\g<attr>\g<quote>' + version_as_str(major, minor, patch) + r'\g<quote>'
     version_found = False
@@ -245,31 +245,35 @@ def create_new_pypi_files_and_delete_old_files_if_setup_exists():
     ensure_process('git', 'add', DIST_PATTERN)
 
 
-def save_existing_pypi_files():
+def save_existing_pypi_files_if_any():
+    if not DIST_PATH.is_dir():
+        return  # No existing PyPI files.
     DIST_PATH.rename(make_bak_path(DIST_PATH))
 
 
-def delete_temp_pypi_files_and_restore_existing_files():
+def delete_temp_pypi_files_and_restore_existing_files_if_any():
     for created_file in DIST_PATH.iterdir():
         created_file.unlink()
     DIST_PATH.rmdir()
-    make_bak_path(DIST_PATH).rename(DIST_PATH)
+    bak_dist_path = make_bak_path(DIST_PATH)
+    if bak_dist_path.is_dir():
+        make_bak_path(DIST_PATH).rename(DIST_PATH)
 
 
 def ensure_pypi_check_if_setup_exists():
     if not SETUP_PATH.is_file():
         return
     ensure_process('python3', '-m', 'pip', 'install', '--user', '--upgrade', 'pip', 'setuptools', 'wheel', 'twine',)
-    save_existing_pypi_files()
+    save_existing_pypi_files_if_any()
     ensure_process(
         'python3', SETUP_NAME, 'sdist', 'bdist_wheel',
-        rollback=delete_temp_pypi_files_and_restore_existing_files,
+        rollback=delete_temp_pypi_files_and_restore_existing_files_if_any,
     )
     ensure_process(
         'python3', '-m', 'twine', 'check', DIST_PATTERN,
-        rollback=delete_temp_pypi_files_and_restore_existing_files,
+        rollback=delete_temp_pypi_files_and_restore_existing_files_if_any,
     )
-    delete_temp_pypi_files_and_restore_existing_files()
+    delete_temp_pypi_files_and_restore_existing_files_if_any()
 
 
 def parse_args():
@@ -286,7 +290,7 @@ def parse_args():
         '-t',
         '--test_pypi',
         help=(
-            'use `Test PyPi` instead of `PyPi` '
+            'use `Test PyPI` instead of `PyPI` '
             '(passes `--repository testpypi` onto twine (https://twine.readthedocs.io/en/latest/).'
         ),
         action='store_true'
@@ -295,7 +299,7 @@ def parse_args():
         '-u',
         '--username',
         help=(
-            'username for `PyPi`/`Test PyPi` '
+            'username for `PyPI`/`Test PyPI` '
             '(passed onto twine (https://twine.readthedocs.io/en/latest/).'
         )
     )
@@ -303,7 +307,7 @@ def parse_args():
         '-p',
         '--password',
         help=(
-            'password for `PyPi`/`Test PyPi` '
+            'password for `PyPI`/`Test PyPI` '
             '(passed onto twine (https://twine.readthedocs.io/en/latest/).'
         )
     )
