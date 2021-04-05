@@ -3,11 +3,11 @@
 See `HELP_TEXT` below or (better) `README.md` file in `__repository__` for more info.
 """
 
-__author__ = "Howard C Lovatt"
+__author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.1.13"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.1.14"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ['main']
 
@@ -27,7 +27,7 @@ VERSION_ATTR = '__version__'
 SETUP_NAME = 'setup.py'
 SETUP_PATH = Path(SETUP_NAME)
 SETUP_VERSION_RE = re.compile(r'(?P<attr>version\s*=\s*)(?P<quote>["|' + r"'])" + VERSION_RE_STR + r'(?P=quote)')
-HELP_TEXT = 'Easy release management: file versioning, git commit, git tagging, and  optionally git remote and PyPI.'
+HELP_TEXT = 'Easy release management: file versioning, git commit, git tagging, and optionally git remote and PyPI.'
 DIST_PATH = Path('dist')
 DIST_PATTERN = str(DIST_PATH / '*')
 PARSER = argparse.ArgumentParser(description=HELP_TEXT, epilog=f'For more information see: {__repository__}.')
