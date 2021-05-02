@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: tag2ver
-Version: 1.1.14
+Version: 1.1.15
 Summary: Easy release management: file versioning, git commit, git tagging, and optionally git remote and PyPI.
 Home-page: https://github.com/hlovatt/tag2ver
 Author: Howard C Lovatt.
@@ -44,8 +44,7 @@ Description: ``tag2var``
         
         Usage from *folder with git repository to tag and source files to version*:
         
-          *  ``python <tag2ver dir>.tag2ver.py [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``
-             (``pip show tag2ver`` will show where ``tag2ver`` is installed, i.e. ``<tag2ver dir>``).
+          *  ``python -m tag2ver [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``.
         
         Options (order of options not important):
         
@@ -135,20 +134,20 @@ Description: ``tag2var``
           * Updates ``setup.py``'s ``version`` attribute with given version 
             (``version`` kwarg must already exist).
         
-        EG (in below ``pip show tag2ver`` gives ``<tag2ver dir>`` as location):
+        EG:
         
-          * ``python <tag2ver dir>.tag2ver.py -h`` prints help.
+          * ``python -m tag2ver -h`` prints help.
         
-          * ``python <tag2ver dir>.tag2ver.py -f 0.0.0 "Add initial tag and version."`` 
+          * ``python -m tag2ver -f 0.0.0 "Add initial tag and version."`` 
             for 1st release (note ``-f`` and note ``0.0.0`` cannot be pushed to PyPI).
         
-          * ``python <tag2ver dir>.tag2ver.py 0.0.1 "Fix bugs, tag, and version."``.
+          * ``python -m tag2ver 0.0.1 "Fix bugs, tag, and version."``.
         
-          * ``python <tag2ver dir>.tag2ver.py 0.1.0 "Add features, tag, and version."``.
+          * ``python -m tag2ver 0.1.0 "Add features, tag, and version."``.
         
-          * ``python <tag2ver dir>.tag2ver.py 1.0.0 "Make incompatible changes, tag, and version."``.
+          * ``python -m tag2ver 1.0.0 "Make incompatible changes, tag, and version."``.
         
-          * ``python <tag2ver dir>.tag2ver.py -u <PyPI user name> 1.0.1 "Push to PyPI."``. 
+          * ``python -m tag2ver -u <PyPI user name> 1.0.1 "Push to PyPI."``. 
             Might need password as well, depending on twine
             (https://twine.readthedocs.io/en/latest/) setup, and requires ``setup.py``.
         
