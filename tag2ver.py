@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.2.1"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.2.2"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 

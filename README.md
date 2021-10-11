@@ -102,10 +102,12 @@ Description usually in quotes (must be the 2nd non-option):
 
 Actions ``tag2ver`` takes in order:
 
-  * Checks git repository exists.
+  * Reformat all files with ``Black`` if ``Black`` installed.
+
+  * Checks git repository exists, if not exit.
 
   * Checks version number is *a* single increment from last git tag (except ``-f`` option) 
-    and of form ``<Major>.<Minor>.<Patch>`` and description exists.
+    and of form ``<Major>.<Minor>.<Patch>`` and description exists, if not exit.
 
   * Checks if PyPI deployed (``setup.py`` must exist) (see note 2)
 
