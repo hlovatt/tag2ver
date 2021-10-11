@@ -9,22 +9,22 @@ def read_text(file_name: str) -> str:
 
 
 setuptools.setup(
-    name='tag2ver',
-    version='1.1.19',
+    name="tag2ver",
+    version="1.2.0",
     url=tag2ver.__repository__,
-    license='MIT License',  # Can only have one line `license`; setuptools bug.
+    license="MIT License",  # Can only have one line `license`; setuptools bug.
     author=tag2ver.__author__,
-    author_email='howard.lovatt@gmail.com',
+    author_email="howard.lovatt@gmail.com",
     description=tag2ver.HELP_TEXT,
-    long_description=read_text('README.md'),
-    long_description_content_type='text/markdown',
-    py_modules=['tag2ver'],
-    platforms=['any'],
+    long_description=read_text("README.md"),
+    long_description_content_type="text/markdown",
+    py_modules=["tag2ver"],
+    platforms=["any"],
     classifiers=[
-        'Intended Audience :: Developers',
-        'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires=">=3.6",
 )
