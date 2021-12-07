@@ -39,7 +39,7 @@ because you are not prompted.
 See 
 https://stackoverflow.com/questions/5343068/is-there-a-way-to-cache-https-credentials-for-pushing-commits
 for how to cache credentials.
-If you forget to cache credentials you will get a 128 error from the git push command.
+If you forget to cache credentials you will get a 128 error from the `git push` command.
 
 Help Text
 ---------

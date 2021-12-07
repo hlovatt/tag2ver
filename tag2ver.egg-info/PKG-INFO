@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: tag2ver
-Version: 1.2.2
+Version: 1.2.3
 Summary: Easy release management: file versioning, git commit, git tagging, and optionally git remote and PyPI.
 Home-page: https://github.com/hlovatt/tag2ver
 Author: Howard C Lovatt.
@@ -56,7 +56,7 @@ because you are not prompted.
 See 
 https://stackoverflow.com/questions/5343068/is-there-a-way-to-cache-https-credentials-for-pushing-commits
 for how to cache credentials.
-If you forget to cache credentials you will get a 128 error from the git push command.
+If you forget to cache credentials you will get a 128 error from the `git push` command.
 
 Help Text
 ---------
