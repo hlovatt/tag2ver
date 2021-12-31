@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """
 See `HELP_TEXT` below or (better) `README.md` file in `__repository__` for more info.
 """
@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.2.4"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.2.6"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -257,7 +257,7 @@ def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
     username: Final = ["--username", args.username] if args.username else []
     password: Final = ["--password", args.password] if args.password else []
     ensure_process(
-        "python3",
+        "python",
         "-m",
         "twine",
         "upload",
@@ -272,7 +272,7 @@ def create_new_pypi_files_and_delete_old_files_if_any_and_if_setup_exists():
     if not SETUP_PATH.is_file():
         return
     if DIST_PATH.is_dir():
-        ensure_process("git", "rm", DIST_PATTERN)
+        ensure_process("git", "rm", "-f", DIST_PATTERN)
     ensure_process("python", "-m", "build")
     ensure_process("git", "add", DIST_PATTERN)
 
@@ -297,7 +297,7 @@ def ensure_pypi_check_if_setup_exists():
     if not SETUP_PATH.is_file():
         return
     ensure_process(
-        "python3",
+        "python",
         "-m",
         "pip",
         "install",
@@ -316,7 +316,7 @@ def ensure_pypi_check_if_setup_exists():
         rollback=delete_temp_pypi_files_and_restore_existing_files_if_any,
     )
     ensure_process(
-        "python3",
+        "python",
         "-m",
         "twine",
         "check",
