@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.2.3"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.2.4"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -273,7 +273,7 @@ def create_new_pypi_files_and_delete_old_files_if_any_and_if_setup_exists():
         return
     if DIST_PATH.is_dir():
         ensure_process("git", "rm", DIST_PATTERN)
-    ensure_process("python3", SETUP_NAME, "sdist", "bdist_wheel")
+    ensure_process("python", "-m", "build")
     ensure_process("git", "add", DIST_PATTERN)
 
 
@@ -310,10 +310,9 @@ def ensure_pypi_check_if_setup_exists():
     )
     save_existing_pypi_files_if_any()
     ensure_process(
-        "python3",
-        SETUP_NAME,
-        "sdist",
-        "bdist_wheel",
+        "python",
+        "-m",
+        "build",
         rollback=delete_temp_pypi_files_and_restore_existing_files_if_any,
     )
     ensure_process(
