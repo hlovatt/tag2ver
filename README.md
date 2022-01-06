@@ -2,7 +2,7 @@
 ===========
 
 Easy release management: file versioning, git commit, git tagging, and  optionally 
-git remote and PyPI. 
+Black, git remote, and PyPI. 
 
 The name ``tag2var`` is meant to convey that the utility does everything from 
 git-tagging to file-versioning and all in between and either side. In particular
@@ -113,7 +113,7 @@ Actions ``tag2ver`` takes in order:
 
   * Updates the ``__version__`` attribute of all the ``py``, except ``setup.py`` (see above), 
     and ``pyi`` file's in the 
-    current directory and sub-directories with given version 
+    current directory and subdirectories with given version 
     (``__version__`` attributes must already exist in all files).
 
   * Commits all modified files, including ``py`` and ``pyi`` files ``tag2ver`` has modified, 
