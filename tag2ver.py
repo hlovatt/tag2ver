@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.2.7"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.2.8"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -235,17 +235,20 @@ def tag_repository(major: int, minor: int, patch: int, description: str):
 
 def push_repository_if_remote_exists(major: int, minor: int, patch: int):
     git_check_remote_process: Final = subprocess.run(
-        ["git", "ls-remote"], capture_output=True
+        ["git", "ls-remote"], capture_output=True,
     )
     if git_check_remote_process.returncode == 0 and bool(
         git_check_remote_process.stdout
     ):
+        git_head_name_process: Final = subprocess.run(
+            ["git", "symbolic-ref", "--short", "HEAD"], capture_output=True,
+        )
         ensure_process(
             "git",
             "push",
             "--atomic",
             "origin",
-            "master",
+            git_head_name_process.stdout.strip(),
             version_as_str(major, minor, patch),
         )
 
