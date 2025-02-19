@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.2.9"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.2.10"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -60,15 +60,15 @@ def ensure_process(*cmd: str, rollback: Callable[[], None] = lambda: None):
     ensure(
         process.returncode == 0,
         (
-            f"Sub-process `{process.args}` "
-            f"failed with exit code {process.returncode} "
-            + f"with message `{process.stdout.strip()}`"
-            if process.stdout
-            else (
-                "" + f"and error message `{process.stderr.strip()}`"
+            f"Sub-process `{process.args}`"
+            + f" failed with exit code {process.returncode}"
+            + (f" with message `{process.stdout.strip()}`" if process.stdout else "")
+            + (
+                f" and error message `{process.stderr.strip()}`"
                 if process.stderr
                 else ""
             )
+            + "."
         ),
         rollback=rollback,
     )
