@@ -10,7 +10,7 @@ def read_text(file_name: str) -> str:
 
 setuptools.setup(
     name="tag2ver",
-    version="1.2.8",
+    version="1.2.9",
     url=tag2ver.__repository__,
     license="MIT License",  # Can only have one line `license`; setuptools bug.
     author=tag2ver.__author__,
@@ -26,5 +26,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.9",
 )

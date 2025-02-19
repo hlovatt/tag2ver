@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.2.8"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.2.9"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -29,7 +29,9 @@ SETUP_PATH: Final = Path(SETUP_NAME)
 SETUP_VERSION_RE: Final = re.compile(
     r'(?P<attr>version\s*=\s*)(?P<quote>["|' + r"'])" + VERSION_RE_STR + r"(?P=quote)"
 )
-HELP_TEXT: Final = "Easy release management: file versioning, git commit, git tagging, and optionally git remote and PyPI."
+HELP_TEXT: Final = (
+    "Easy release management: file versioning, git commit, git tagging, and optionally git remote and PyPI."
+)
 DIST_PATH: Final = Path("dist")
 DIST_PATTERN: Final = str(DIST_PATH / "*")
 PARSER: Final = argparse.ArgumentParser(
@@ -50,17 +52,34 @@ def ensure(condition: bool, msg: str, *, rollback: Callable[[], None] = lambda: 
 
 
 def ensure_process(*cmd: str, rollback: Callable[[], None] = lambda: None):
-    process = subprocess.run(cmd, capture_output=True, text=True,)
+    process = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+    )
     ensure(
         process.returncode == 0,
-        f"Sub-process `{process.args}` failed with exit code {process.returncode} and error message `{process.stdout}`",
+        (
+            f"Sub-process `{process.args}` "
+            f"failed with exit code {process.returncode} "
+            + f"with message `{process.stdout.strip()}`"
+            if process.stdout
+            else (
+                "" + f"and error message `{process.stderr.strip()}`"
+                if process.stderr
+                else ""
+            )
+        ),
         rollback=rollback,
     )
     return process
 
 
 def ensure_git_exists():
-    git_check_process = subprocess.run(["git", "ls-files"], capture_output=True,)
+    git_check_process = subprocess.run(
+        ["git", "ls-files"],
+        capture_output=True,
+    )
     ensure(
         git_check_process.returncode == 0 and git_check_process.stdout,
         f"Current directory, {os.getcwd()}, does not have a git repository with at least one file.",
@@ -81,7 +100,10 @@ def parse_version(version: str):
 
 
 def ensure_tag_version_if_not_forced(
-    major: int, minor: int, patch: int, forced_version: bool,
+    major: int,
+    minor: int,
+    patch: int,
+    forced_version: bool,
 ):
     if forced_version:
         return
@@ -125,7 +147,10 @@ def dist_files():
 
 
 def ensure_setup_version_and_version_setup_if_setup_exists(
-    major: int, minor: int, patch: int, args: argparse.Namespace,
+    major: int,
+    minor: int,
+    patch: int,
+    args: argparse.Namespace,
 ):
     if not SETUP_PATH.is_file():
         ensure(
@@ -133,9 +158,9 @@ def ensure_setup_version_and_version_setup_if_setup_exists(
             "`Test PyPI specified but no `" + SETUP_NAME + "` file!",
         )
         return
-    sub_str: Final = r"\g<attr>\g<quote>" + version_as_str(
-        major, minor, patch
-    ) + r"\g<quote>"
+    sub_str: Final = (
+        r"\g<attr>\g<quote>" + version_as_str(major, minor, patch) + r"\g<quote>"
+    )
     version_found = False
     new_setup: Final[List[str]] = []
     with SETUP_PATH.open() as setup_lines:
@@ -235,20 +260,22 @@ def tag_repository(major: int, minor: int, patch: int, description: str):
 
 def push_repository_if_remote_exists(major: int, minor: int, patch: int):
     git_check_remote_process: Final = subprocess.run(
-        ["git", "ls-remote"], capture_output=True,
+        ["git", "ls-remote"],
+        capture_output=True,
     )
     if git_check_remote_process.returncode == 0 and bool(
         git_check_remote_process.stdout
     ):
         git_head_name_process: Final = subprocess.run(
-            ["git", "symbolic-ref", "--short", "HEAD"], capture_output=True,
+            ["git", "symbolic-ref", "--short", "HEAD"],
+            capture_output=True,
         )
         ensure_process(
             "git",
             "push",
             "--atomic",
             "origin",
-            git_head_name_process.stdout.strip(),
+            str(git_head_name_process.stdout.strip()),
             version_as_str(major, minor, patch),
         )
 
@@ -299,6 +326,12 @@ def delete_temp_pypi_files_and_restore_existing_files_if_any():
 def ensure_pypi_check_if_setup_exists():
     if not SETUP_PATH.is_file():
         return
+    ensure(
+        sys.base_prefix == sys.prefix,
+        "Cannot run `tag2ver` inside a `venv`, "
+        "because it installs packages "
+        "using `pip`'s `--User` option that `venv`s don't support.",
+    )
     ensure_process(
         "python",
         "-m",
@@ -310,6 +343,7 @@ def ensure_pypi_check_if_setup_exists():
         "setuptools",
         "wheel",
         "twine",
+        "packaging",
     )
     save_existing_pypi_files_if_any()
     ensure_process(
@@ -378,7 +412,9 @@ def parse_args():
 
 def format_with_black_if_installed():
     black_check: Final = subprocess.run(
-        ["black", "--version"], capture_output=True, text=True,
+        ["black", "--version"],
+        capture_output=True,
+        text=True,
     )
     if black_check.returncode != 0:
         return

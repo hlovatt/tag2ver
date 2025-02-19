@@ -1,12 +1,12 @@
-``tag2var``
+``tag2ver``
 ===========
 
 Easy release management: file versioning, git commit, git tagging, and  optionally 
 Black, git remote, and PyPI. 
 
-The name ``tag2var`` is meant to convey that the utility does everything from 
+The name ``tag2ver`` is meant to convey that the utility does everything from 
 git-tagging to file-versioning and all in between and either side. In particular
-``tag2var``:
+``tag2ver``:
 
   1. If ```Black``` (https://black.readthedocs.io/en/stable/index.html)
      is installed will format all files with: ``black .``.
@@ -27,7 +27,7 @@ git-tagging to file-versioning and all in between and either side. In particular
 ``tag2ver`` is careful to check everything before making changes, i.e. it is heavily
 biased to finding and reporting an error before attempting any actions.
 
-The whole program is in the single file, ``tag2var.py``, (without any dependencies outside 
+The whole program is in the single file, ``tag2ver.py``, (without any dependencies outside 
 Python3.6+) and therefore this file alone can be copied to install the utility. 
 
 Alternatively::

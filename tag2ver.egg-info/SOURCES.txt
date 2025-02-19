@@ -1,8 +1,0 @@
-LICENSE
-README.md
-setup.py
-tag2ver.py
-tag2ver.egg-info/PKG-INFO
-tag2ver.egg-info/SOURCES.txt
-tag2ver.egg-info/dependency_links.txt
-tag2ver.egg-info/top_level.txt
