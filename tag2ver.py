@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.2.11"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.2.12"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -267,8 +267,7 @@ def push_repository_if_remote_exists(major: int, minor: int, patch: int):
         git_check_remote_process.stdout
     ):
         git_head_name_process: Final = subprocess.run(
-            ["git", "symbolic-ref", "--short", "HEAD"],
-            capture_output=True,
+            ["git", "symbolic-ref", "--short", "HEAD"], capture_output=True, text=True
         )
         print(f"***\n{git_head_name_process.stdout}\n***\n")
         ensure_process(
