@@ -121,22 +121,33 @@ Actions ``tag2ver`` takes in order:
 
   * Tags the repository with given version and given description.
 
-  * If ``remote`` repository exists, pushes ``origin`` to ``master``.
+  * If ``remote`` repository exists, pushes ``origin`` to ``HEAD`` (typically ``main``). 
+    Remote git repositories require authentication typically using a credential helper,
+    e.g. https://github.com/hickford/git-credential-oauth.
 
   * If ``setup.py`` exists, uploads to ``PyPI`` (or ``Test PyPI`` with ``-t`` option) with given 
     version. 
     Username, ``-u`` or ``--username``, and password, ``-p`` or ``--password``, 
     may optionally be specified.
     (Upload uses twine (<https://twine.readthedocs.io/en/latest/>), 
-    see link for other options for specifying username and password.)
+    see link for other options for specifying username and password.
+    To save entering the username and password Twine has keyring support. 
+    )
 
-Note 2:
+Note 2: dywrem-tajqok-bodvY3
 
   * Checks version number is at least one increment from last PyPI deployment 
     (regardless of ``-f`` option - PyPI versioning cannot be overridden).
 
   * Updates ``setup.py``'s ``version`` attribute with given version 
     (``version`` kwarg must already exist).
+
+  * Checks that ``tag2ver`` is *not* running inside a virtual environment;
+    see next point, ``pip`` is used with option ``--User`` that is not supported
+    inside virtual environments.
+
+  * From PyPI updates ``pip``, ``setuptools``, ``wheel``, ``twine``, and ``packaging``,
+    using option ``--User`` so that the global versions for other users are not affected.
 
 EG:
 
