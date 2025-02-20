@@ -7,7 +7,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.2.13"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.2.14"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -269,7 +269,7 @@ def push_repository_if_remote_exists(major: int, minor: int, patch: int):
         git_head_name_process: Final = subprocess.run(
             ["git", "symbolic-ref", "--short", "HEAD"], capture_output=True, text=True
         )
-        print(f"***\n{git_head_name_process.stdout}\n***\n")
+        print("start git cmd\n")
         ensure_process(
             "git",
             "push",
@@ -278,6 +278,7 @@ def push_repository_if_remote_exists(major: int, minor: int, patch: int):
             str(git_head_name_process.stdout.strip()),
             version_as_str(major, minor, patch),
         )
+        print("finish git cmd")
 
 
 def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
