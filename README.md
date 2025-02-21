@@ -18,7 +18,7 @@ git-tagging to file-versioning and all in between and either side. In particular
 
   4. Git commits all modified files with given description.
 
-  5. Git tags git repository with given version and given description.
+  5. Git tags git repository with given version.
 
   6. Pushes to remote git (if remote exists).
 
@@ -28,7 +28,7 @@ git-tagging to file-versioning and all in between and either side. In particular
 biased to finding and reporting an error before attempting any actions.
 
 The whole program is in the single file, ``tag2ver.py``, (without any dependencies outside 
-Python3.6+) and therefore this file alone can be copied to install the utility. 
+Python itself) and therefore ``tag2ver.py`` alone can be copied to install the utility. 
 
 Alternatively::
 
@@ -37,8 +37,9 @@ Alternatively::
 Before use with a remote git repository, e.g. GitHub, you *must* cache your credentials 
 because you are not prompted.
 See 
-https://stackoverflow.com/questions/5343068/is-there-a-way-to-cache-https-credentials-for-pushing-commits
-for how to cache credentials.
+<https://stackoverflow.com/questions/5343068/is-there-a-way-to-cache-https-credentials-for-pushing-commits>
+for how to cache credentials,
+EG <https://github.com/hickford/git-credential-oauth>.
 If you forget to cache credentials you will get a 128 error from the `git push` command.
 
 Help Text
@@ -46,7 +47,7 @@ Help Text
 
 Usage from *folder with git repository to tag and source files to version*:
 
-  *  ``python -m tag2ver [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``.
+  * ``python -m tag2ver [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``.
 
 Options (order of options not important):
 
@@ -66,7 +67,7 @@ Options (order of options not important):
   * ``-p <Password>`` or ``--password <Password>``, for ``PyPI``/``Test PyPI`` (if ``setup.py`` exists).
     Passed onto twine (<https://twine.readthedocs.io/en/latest/>).
 
-Version in form <Major>.<Minor>.<Patch> (must be the 1st non-option):
+Version in form ``<Major>.<Minor>.<Patch>`` (must be the 1st non-option):
 
   * Must be a semantic version (<https://semver.org>) with format ``<Major>.<Minor>.<Patch>``,
     where ``Major``, ``Minor``, and ``Patch`` are positive integers or zero.
@@ -123,18 +124,21 @@ Actions ``tag2ver`` takes in order:
 
   * If ``remote`` repository exists, pushes ``origin`` to ``HEAD`` (typically ``main``). 
     Remote git repositories require authentication typically using a credential helper,
-    e.g. https://github.com/hickford/git-credential-oauth.
+    EG <https://github.com/hickford/git-credential-oauth>.
 
-  * If ``setup.py`` exists, uploads to ``PyPI`` (or ``Test PyPI`` with ``-t`` option) with given 
-    version. 
+  * If ``setup.py`` exists, uploads to ``PyPI`` (or ``Test PyPI`` with ``-t`` option) 
+    with given version. 
     Username, ``-u`` or ``--username``, and password, ``-p`` or ``--password``, 
     may optionally be specified.
-    (Upload uses twine (<https://twine.readthedocs.io/en/latest/>), 
-    see link for other options for specifying username and password.
-    To save entering the username and password Twine has keyring support. 
-    )
+    To use an API token on PyPI or Test PyPI the username is ``__token__`` and the
+    password is the relevant API token.
+    (Upload uses twine (<https://twine.readthedocs.io/en/latest/>); 
+    see link for other options for specifying username and password,
+    EG ``keyring`` or ``~/.pypirc``.
+    An example of a typical ``setup.py`` is ``tag2ver``'s ``setup.py``
+    <https://github.com/hlovatt/tag2ver/blob/main/setup.py>.)
 
-Note 2: dywrem-tajqok-bodvY3
+Note 2:
 
   * Checks version number is at least one increment from last PyPI deployment 
     (regardless of ``-f`` option - PyPI versioning cannot be overridden).
@@ -163,5 +167,5 @@ EG:
   * ``python -m tag2ver 1.0.0 "Make incompatible changes, tag, and version."``.
 
   * ``python -m tag2ver -u <PyPI user name> 1.0.1 "Push to PyPI."``. 
-    Might need password as well, depending on twine
+    Might need password as well, depending on Twine
     (https://twine.readthedocs.io/en/latest/) setup, and requires ``setup.py``.
