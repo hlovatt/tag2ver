@@ -62,7 +62,8 @@ Help Text
 Usage from *folder with git repository to tag and source
 files to version*:
 
-* ``python -m tag2ver [options] [<Major>.<Minor>.<Patch> "Release/commit Description."]``.
+* ``python -m tag2ver [options] <Major>.<Minor>.<Patch>
+  "Release/commit Description."``.
 
 Options (order of options not important):
 
@@ -142,6 +143,10 @@ Actions ``tag2ver`` takes in order:
 * Reformat all files with ``Black`` if ``Black`` installed.
 
 * Checks git repository exists, if not exit.
+
+* Creates a ``.gitignore`` if necessary, ensures ``.gitignore``
+  contains ``dist/`` and ``*.egg-info/``, and ensures
+  ``dist/`` and ``*.egg-info/`` are not added to ``git``.
 
 * Checks version number is *a* single increment from last
   git tag (except ``-f`` option)

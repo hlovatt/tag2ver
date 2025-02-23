@@ -3,11 +3,14 @@
 See `HELP_TEXT` below or (better) `README.rst` file in `__repository__` for more info.
 """
 
+# TODO Change way it works so that dist isn't added to git. Could delete dist and nonesafe.egg-info before running Twine?
+#     Then don't have to remove dist and egg-info. (egg-info might not be added).
+
 __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.3.3"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.4.0"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -30,14 +33,22 @@ SETUP_VERSION_RE: Final = re.compile(
     r'(?P<attr>version\s*=\s*)(?P<quote>["|' + r"'])" + VERSION_RE_STR + r"(?P=quote)"
 )
 HELP_TEXT: Final = (
-    "Easy release management: file versioning, git commit, git tagging, and optionally git remote and PyPI."
+    "Easy release management: file versioning, git commit, git tagging, and optionally git remote, and PyPI."
 )
-DIST_PATH: Final = Path("dist")
+EGG_NAME: Final = "*.egg-info/"
+BUILD_NAME: Final = "build/"
+DIST_NAME: Final = "dist/"
+DIST_PATH: Final = Path(DIST_NAME)
 DIST_PATTERN: Final = str(DIST_PATH / "*")
 PARSER: Final = argparse.ArgumentParser(
     description=HELP_TEXT, epilog=f"For more information see: {__repository__}."
 )
-EXCLUDE_PATHS: Final = [Path("build"), DIST_PATH, Path("media"), Path("venv")]
+EXCLUDE_PATHS_FROM_PYTHON_FILE_SEARCH: Final = [
+    Path(BUILD_NAME),
+    DIST_PATH,
+    Path("media"),
+    Path("venv"),
+]
 
 
 def ensure(condition: bool, msg: str, *, rollback: Callable[[], None] = lambda: None):
@@ -51,12 +62,16 @@ def ensure(condition: bool, msg: str, *, rollback: Callable[[], None] = lambda: 
     exit(1)
 
 
-def ensure_process(*cmd: str, rollback: Callable[[], None] = lambda: None):
-    process = subprocess.run(
+def process_run(*cmd: str) -> subprocess.CompletedProcess:
+    return subprocess.run(
         cmd,
         capture_output=True,
         text=True,
     )
+
+
+def ensure_process(*cmd: str, rollback: Callable[[], None] = lambda: None):
+    process = process_run(*cmd)
     ensure(
         process.returncode == 0,
         (
@@ -75,15 +90,25 @@ def ensure_process(*cmd: str, rollback: Callable[[], None] = lambda: None):
     return process
 
 
-def ensure_git_exists():
-    git_check_process = subprocess.run(
-        ["git", "ls-files"],
-        capture_output=True,
-    )
+def ensure_git_exists_and_create_gitignore_if_necessary():
+    git_check_process = process_run("git", "ls-files")
     ensure(
         git_check_process.returncode == 0 and git_check_process.stdout,
-        f"Current directory, {os.getcwd()}, does not have a git repository with at least one file.",
+        f"Current directory, `{os.getcwd()}`, does not have a git repository with at least one file.",
     )
+    with open(".gitignore", "a+") as f:
+        f.seek(0)
+        gitignore = f.read()
+
+        def write_if_missing(name: str):
+            if name not in gitignore:
+                process_run("git", "rm", "-r", "--cached", name)
+                f.write("# Added by `tag2ver`\n")
+                f.write(name + "\n")
+
+        write_if_missing(BUILD_NAME)
+        write_if_missing(EGG_NAME)
+        write_if_missing(DIST_NAME)
 
 
 def parse_version(version: str):
@@ -209,7 +234,7 @@ def not_excluded_dir(path: Path):
     if len(parents) < 2:
         return True
     root_parent = parents[-2]
-    return not (root_parent in EXCLUDE_PATHS) and not (
+    return not (root_parent in EXCLUDE_PATHS_FROM_PYTHON_FILE_SEARCH) and not (
         root_parent.suffix == ".egg_info"
     )
 
@@ -259,15 +284,12 @@ def tag_repository(major: int, minor: int, patch: int, description: str):
 
 
 def push_repository_if_remote_exists(major: int, minor: int, patch: int):
-    git_check_remote_process: Final = subprocess.run(
-        ["git", "ls-remote"],
-        capture_output=True,
-    )
+    git_check_remote_process: Final = process_run("git", "ls-remote")
     if git_check_remote_process.returncode == 0 and bool(
         git_check_remote_process.stdout
     ):
-        git_head_name_process: Final = subprocess.run(
-            ["git", "symbolic-ref", "--short", "HEAD"], capture_output=True, text=True
+        git_head_name_process: Final = process_run(
+            "git", "symbolic-ref", "--short", "HEAD"
         )
         ensure_process(
             "git",
@@ -300,10 +322,7 @@ def publish_to_pypi_if_setup_exists(args: argparse.Namespace):
 def create_new_pypi_files_and_delete_old_files_if_any_and_if_setup_exists():
     if not SETUP_PATH.is_file():
         return
-    if DIST_PATH.is_dir():
-        ensure_process("git", "rm", "-f", DIST_PATTERN)
     ensure_process("python", "-m", "build")
-    ensure_process("git", "add", DIST_PATTERN)
 
 
 def save_existing_pypi_files_if_any():
@@ -410,11 +429,7 @@ def parse_args():
 
 
 def format_with_black_if_installed():
-    black_check: Final = subprocess.run(
-        ["black", "--version"],
-        capture_output=True,
-        text=True,
-    )
+    black_check: Final = process_run("black", "--version")
     if black_check.returncode != 0:
         return
     ensure_process("black", ".")
@@ -422,7 +437,7 @@ def format_with_black_if_installed():
 
 def main():
     format_with_black_if_installed()
-    ensure_git_exists()
+    ensure_git_exists_and_create_gitignore_if_necessary()
     args: Final = parse_args()
     forced_version, version, description = (
         args.force_tag,
