@@ -3,14 +3,13 @@
 See `HELP_TEXT` below or (better) `README.rst` file in `__repository__` for more info.
 """
 
-# TODO Change way it works so that dist isn't added to git. Could delete dist and nonesafe.egg-info before running Twine?
-#     Then don't have to remove dist and egg-info. (egg-info might not be added).
+# TODO Add check on latest `tag2ver` in use.
 
 __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.4.1"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.4.2"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 

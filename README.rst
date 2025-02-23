@@ -145,8 +145,8 @@ Actions ``tag2ver`` takes in order:
 * Checks git repository exists, if not exit.
 
 * Creates a ``.gitignore`` if necessary, ensures ``.gitignore``
-  contains ``dist/`` and ``*.egg-info/``, and ensures
-  ``dist/`` and ``*.egg-info/`` are not added to ``git``.
+  contains ``build/``, ``*.egg-info/``, and ``dist/`` and deletes
+  them from ``git`` id already present.
 
 * Checks version number is *a* single increment from last
   git tag (except ``-f`` option)
