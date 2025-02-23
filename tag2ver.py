@@ -10,7 +10,7 @@ __author__ = "Howard C Lovatt."
 __copyright__ = "Howard C Lovatt, 2020 onwards."
 __license__ = "MIT https://opensource.org/licenses/MIT."
 __repository__ = "https://github.com/hlovatt/tag2ver"
-__version__ = "1.4.0"  # Version set by https://github.com/hlovatt/tag2ver
+__version__ = "1.4.1"  # Version set by https://github.com/hlovatt/tag2ver
 
 __all__ = ["main"]
 
@@ -35,6 +35,7 @@ SETUP_VERSION_RE: Final = re.compile(
 HELP_TEXT: Final = (
     "Easy release management: file versioning, git commit, git tagging, and optionally git remote, and PyPI."
 )
+GITIGNORE_NAME: Final = ".gitignore"
 EGG_NAME: Final = "*.egg-info/"
 BUILD_NAME: Final = "build/"
 DIST_NAME: Final = "dist/"
@@ -96,15 +97,17 @@ def ensure_git_exists_and_create_gitignore_if_necessary():
         git_check_process.returncode == 0 and git_check_process.stdout,
         f"Current directory, `{os.getcwd()}`, does not have a git repository with at least one file.",
     )
-    with open(".gitignore", "a+") as f:
-        f.seek(0)
+    if not Path(GITIGNORE_NAME).is_file():
+        with open(GITIGNORE_NAME, "x+") as f:
+            f.write("# File created by `tag2ver`.\n")
+        ensure_process("git", "add", GITIGNORE_NAME)
+    with open(GITIGNORE_NAME, "r+") as f:
         gitignore = f.read()
 
         def write_if_missing(name: str):
             if name not in gitignore:
                 process_run("git", "rm", "-r", "--cached", name)
-                f.write("# Added by `tag2ver`\n")
-                f.write(name + "\n")
+                f.write(f"# Entry added by `tag2ver`.\n{name}\n")
 
         write_if_missing(BUILD_NAME)
         write_if_missing(EGG_NAME)
